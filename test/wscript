@@ -1,0 +1,23 @@
+
+#! /usr/bin/env python
+# encoding: utf-8
+
+def options(ctx):
+    ctx.add_option('--buildtest', action='store', default=True, help='Build the test application also.')
+
+def configure(ctx):
+    if ctx.options.buildtest:
+        ctx.env.BUILD_TEST = True
+    else:
+        ctx.env.BUILD_TEST = False
+
+def build(ctx):
+    if ctx.env.BUILD_TEST:
+        # Copy over everything in our data folder.
+        for file in ctx.path.ant_glob('data/**/*'):
+            ctx(feature='subst', name='data_' + file.name, rule='cp ${SRC} ${TGT}', source=file, target=file.get_bld())
+
+        ctx.program(source=ctx.path.ant_glob('src/**/*.c'),
+                    target='noroi_test',
+                    use='noroi',
+                    vnum='0.1')
