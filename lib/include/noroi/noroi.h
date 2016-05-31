@@ -77,6 +77,13 @@ void NR_GetCaption(NR_Handle hnd, char* buf);
 void NR_SetGlyph(NR_Handle hnd, int x, int y, const NR_Glyph* glyph);
 NR_Glyph NR_GetGlyph(NR_Handle hnd, int x, int y);
 
+// Draw a square
+void NR_RectangleFill(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph);
+void NR_Rectangle(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph);
+
+// Draw text
+void NR_Text(NR_Handle hnd, int x, int y, const char* text);
+
 // Clear everything.
 void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph);
 

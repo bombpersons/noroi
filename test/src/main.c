@@ -18,19 +18,28 @@ int main(int argc, char** argv) {
     memset(&glyph, 0, sizeof(glyph));
 
     glyph.c = '#';
-    glyph.flash = true;
+    glyph.flash = false;
     glyph.bold = true;
 
     //NR_Clear(hnd, &glyph);
     NR_SetGlyph(hnd, 10, 10, &glyph);
+    NR_Text(hnd, 20, 20, "Hey, this is text!");
+
+    //NR_Rectangle(hnd, 0, 0, 5, 5, &glyph);
+    //NR_RectangleFill(hnd, 0, 0, 5, 5, &glyph);
+    NR_Clear(hnd, &glyph);
 
     // Update the screen.
     NR_SwapBuffers(hnd);
 
-    sleep(10);
+    getch();
 
     // Destroy our handle
     NR_DestroyHandle(hnd);
+
+    NR_Glyph test = NR_GetGlyph(hnd, 0, 0);
+    printf("%c, bold: %d\n", test.c, test.bold);
+
   } else {
     printf("Couldn't create a handle.\n");
   }
