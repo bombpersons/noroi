@@ -57,7 +57,7 @@ static NR_Button ConvGLFWButtonMod(int button) {
     case GLFW_MOUSE_BUTTON_RIGHT: return NR_BUTTON_RIGHT;
     case GLFW_MOUSE_BUTTON_MIDDLE: return NR_BUTTON_MIDDLE;
     case GLFW_MOUSE_BUTTON_LEFT: return NR_BUTTON_LEFT;
-    default: NR_BUTTON_LEFT;
+    default: return NR_BUTTON_LEFT;
   }
 }
 

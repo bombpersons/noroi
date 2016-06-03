@@ -43,9 +43,6 @@ bool NR_PollEvent(NR_Handle hnd, NR_Event* event) {
   if (e == ERR)
     return false;
 
-  if (e == KEY_ENTER)
-    printf("KEY DOWN\n");
-
   event->type = NR_EVENT_KEY_PRESS;
   event->data.keyData.key = NR_KEY_UP;
   printf("%c\n", e);

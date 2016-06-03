@@ -61,6 +61,8 @@ int main(int argc, char** argv) {
             printf("Resized to (%i, %i)\n", event.data.resizeData.w, event.data.resizeData.h);
             break;
 
+          default:
+            break;
         }
       }
     }
