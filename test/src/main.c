@@ -1,5 +1,10 @@
 #include <noroi/noroi.h>
+#include <noroi/misc/noroi_event_queue.h>
+#include <noroi/glfw/noroi_glfw_font.h>
+
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int main(int argc, char** argv) {
   // Try to initialize.
@@ -8,23 +13,34 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  NR_Glyph glyph;
+  memset(&glyph, 0, sizeof(NR_Glyph));
+
+  glyph.c = '#';
+  glyph.flash = false;
+  glyph.bold = true;
+
   // Make a handle.
   NR_Handle hnd = NR_CreateHandle();
   if (hnd) {
+    // Test font stuff.
+    NR_Font_Init();
+    NR_Font* newFont = NR_Font_Load("data/Anonymous-Pro.ttf");
+    if (newFont) {
+      printf("loaded font\n");
+
+      NR_Font_Draw(newFont, &glyph, 1, 1);
+      NR_Font_Delete(newFont);
+    }
+    NR_Font_Shutdown();
+
     NR_SetSize(hnd, 20, 30);
-
-    // Clear the screen to '#'
-    NR_Glyph glyph;
-    memset(&glyph, 0, sizeof(glyph));
-
-    glyph.c = '#';
-    glyph.flash = false;
-    glyph.bold = true;
 
     //NR_Clear(hnd, &glyph);
     NR_SetGlyph(hnd, 10, 10, &glyph);
     NR_Text(hnd, 20, 20, "Hey, this is text!");
 
+    // Clear the screen to '#'
     //NR_Rectangle(hnd, 0, 0, 5, 5, &glyph);
     //NR_RectangleFill(hnd, 0, 0, 5, 5, &glyph);
     NR_Clear(hnd, &glyph);
@@ -32,7 +48,22 @@ int main(int argc, char** argv) {
     // Update the screen.
     NR_SwapBuffers(hnd);
 
-    getch();
+    NR_Event event = {};
+    bool running = true;
+    while (running) {
+      if (NR_PollEvent(hnd, &event)) {
+        switch (event.type) {
+          case NR_EVENT_QUIT:
+            running = false;
+            break;
+
+          case NR_EVENT_RESIZE:
+            printf("Resized to (%i, %i)\n", event.data.resizeData.w, event.data.resizeData.h);
+            break;
+
+        }
+      }
+    }
 
     // Destroy our handle
     NR_DestroyHandle(hnd);

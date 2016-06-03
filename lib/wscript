@@ -11,10 +11,16 @@ def configure(ctx):
     import sys
 
     if ctx.options.impl == 'gl':
+        # For opengl extensions.
         ctx.env.append_value('NOROI_LIB', ['glad'])
 
-        ctx.check_cxx(lib='glfw', uselib_store='glfw', mandatory=True)
+        # For our window + opengl context.
+        ctx.check_cfg(package='glfw3', args='--cflags --libs', uselib_store='glfw', mandatory=True)
         ctx.env.append_value('NOROI_LIB', ['glfw'])
+
+        # For text rendering
+        ctx.check_cfg(package='freetype2', args='--cflags --libs', uselib_store='freetype', mandatory=True);
+        ctx.env.append_value('NOROI_LIB', ['freetype']);
 
         ctx.env.CFLAGS = ['-DNOROI_USE_GLFW']
 
@@ -22,7 +28,7 @@ def configure(ctx):
         if sys.platform == 'win32' or sys.platform == 'cygwin' or sys.platform == 'msys':
             ctx.env.CFLAGS = ['-DNOROI_TERMINAL_WINDOWS']
         else:
-            ctx.check_cxx(lib='ncurses', uselib_store='ncurses', mandatory=True)
+            ctx.check_cfg(package='ncurses', args='--cflags --libs', uselib_store='ncurses', mandatory=True)
             ctx.env.append_value('NOROI_LIB', ['ncurses'])
 
             ctx.env.CFLAGS = ['-DNOROI_TERMINAL_NCURSES']

@@ -9,7 +9,6 @@ bool NR_Init() { return true; }
 void NR_Shutdown() {}
 
 // Create / destroy a handle.
-
 static NR_Handle g_soleHandle = 0;
 NR_Handle NR_CreateHandle() {
   // We can only have one handle when using ncurses!
@@ -37,7 +36,21 @@ void NR_DestroyHandle(NR_Handle hnd) {
 }
 
 // Events
-NR_Event* PollEvent(NR_Handle hnd) { return (void*)0; }
+bool NR_PollEvent(NR_Handle hnd, NR_Event* event) {
+  // Make sure getch() doesn't block.
+  timeout(0);
+  char e = getch();
+  if (e == ERR)
+    return false;
+
+  if (e == KEY_ENTER)
+    printf("KEY DOWN\n");
+
+  event->type = NR_EVENT_KEY_PRESS;
+  event->data.keyData.key = NR_KEY_UP;
+  printf("%c\n", e);
+  return true;
+}
 
 // Set / get the size of the window.
 void NR_SetSize(NR_Handle hnd, int width, int height) {
