@@ -1,6 +1,8 @@
 #include <unity.h>
 #include <noroi/misc/noroi_glyphpacker.h>
 
+#include <stdlib.h>
+
 #define START_QUEUE_TEST(width, height, maxPage) \
   NR_GlyphPacker* g = NR_GlyphPacker_New(width, height, maxPage);
 

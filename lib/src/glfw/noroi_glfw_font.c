@@ -71,6 +71,7 @@ void NR_Font_Shutdown() {
 typedef struct {
   FT_Face face;
   NR_GlyphPacker* glyphpacker;
+  GLuint* pages;
 } HandleType;
 
 NR_Font* NR_Font_Load(const char* path) {
@@ -142,11 +143,14 @@ bool NR_Font_Draw(NR_Font* font, const char* string, int width, int height) {
         glyph.height = hnd->face->glyph->bitmap.rows;
         NR_GlyphPacker_Add(hnd->glyphpacker, &glyph);
         found = NR_GlyphPacker_Find(hnd->glyphpacker, codepoint, &glyph);
+
+        // Add it to our texture
+
       }
 
-      // Draw it.
+      //
       if (found) {
-        printf("%i: (%u, %u, %u, %u)\n", codepoint, glyph.x, glyph.y, glyph.width, glyph.height);
+        printf("%i: Page %u (%u, %u, %u, %u)\n", codepoint, glyph.page, glyph.x, glyph.y, glyph.width, glyph.height);
       }
     }
   }
