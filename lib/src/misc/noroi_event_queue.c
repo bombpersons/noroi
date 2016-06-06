@@ -31,6 +31,9 @@ bool NR_EventQueue_Pop(NR_EventQueue* q, NR_Event* event) {
   // Set our start to null, if our end is null.
   if (!q->end) q->start = (void*)0;
 
+  // Dec our count
+  q->count--;
+
   // Queue wasn't empty
   return true;
 }
@@ -49,4 +52,11 @@ void NR_EventQueue_Push(NR_EventQueue* q, NR_Event* event) {
     q->start->prev = node;
     q->start = node;
   }
+
+  q->count++;
+}
+
+unsigned int NR_EventQueue_Count(NR_EventQueue* q) {
+  // Keep going until we reach null
+  return q->count;
 }

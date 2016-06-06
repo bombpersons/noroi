@@ -4,36 +4,3 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-NOROI_NOROI_INCLUDED	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^#define NOROI_NOROI_INCLUDED$/;"	macro	line:2
-NR_Handle	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^typedef void* NR_Handle;$/;"	typedef	line:8
-id	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  uint8_t id;$/;"	member	line:12	struct:__anon1
-NR_Color	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^} NR_Color;$/;"	typedef	line:13	typeref:struct:__anon1
-c	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  char c;$/;"	member	line:17	struct:__anon2
-flash	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  bool flash;$/;"	member	line:19	struct:__anon2
-bold	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  bool bold;$/;"	member	line:20	struct:__anon2
-italic	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  bool italic;$/;"	member	line:21	struct:__anon2
-color	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  NR_Color color;$/;"	member	line:23	struct:__anon2
-NR_Glyph	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^} NR_Glyph;$/;"	typedef	line:24	typeref:struct:__anon2
-NR_KEY_UP	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  NR_KEY_UP,$/;"	enumerator	line:28	enum:__anon3
-NR_KEY_DOWN	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  NR_KEY_DOWN,$/;"	enumerator	line:29	enum:__anon3
-NR_KEY_LEFT	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  NR_KEY_LEFT,$/;"	enumerator	line:30	enum:__anon3
-NR_KEY_RIGHT	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  NR_KEY_RIGHT$/;"	enumerator	line:31	enum:__anon3
-NR_Key	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^} NR_Key;$/;"	typedef	line:32	typeref:enum:__anon3
-NR_EVENT_MOUSE_PRESS	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  NR_EVENT_MOUSE_PRESS,$/;"	enumerator	line:36	enum:__anon4
-NR_EVENT_MOUSE_RELEASE	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  NR_EVENT_MOUSE_RELEASE,$/;"	enumerator	line:37	enum:__anon4
-NR_EVENT_KEY_PRESS	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  NR_EVENT_KEY_PRESS,$/;"	enumerator	line:38	enum:__anon4
-NR_EVENT_KEY_RELEASE	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  NR_EVENT_KEY_RELEASE,$/;"	enumerator	line:39	enum:__anon4
-NR_EVENT_WIN_RESIZE	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  NR_EVENT_WIN_RESIZE$/;"	enumerator	line:41	enum:__anon4
-NR_EventType	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^} NR_EventType;$/;"	typedef	line:42	typeref:enum:__anon4
-type	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  NR_EventType type;$/;"	member	line:46	struct:__anon5
-x	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^    struct { int x, y; } mouseData;$/;"	member	line:48	struct:__anon5::__anon6::__anon7
-y	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^    struct { int x, y; } mouseData;$/;"	member	line:48	struct:__anon5::__anon6::__anon7
-mouseData	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^    struct { int x, y; } mouseData;$/;"	member	line:48	union:__anon5::__anon6	typeref:struct:__anon5::__anon6::__anon7
-key	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^    struct { NR_Key key; char c; } keyData;$/;"	member	line:49	struct:__anon5::__anon6::__anon8
-c	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^    struct { NR_Key key; char c; } keyData;$/;"	member	line:49	struct:__anon5::__anon6::__anon8
-keyData	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^    struct { NR_Key key; char c; } keyData;$/;"	member	line:49	union:__anon5::__anon6	typeref:struct:__anon5::__anon6::__anon8
-w	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^    struct { int w, h; } resizeData;$/;"	member	line:50	struct:__anon5::__anon6::__anon9
-h	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^    struct { int w, h; } resizeData;$/;"	member	line:50	struct:__anon5::__anon6::__anon9
-resizeData	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^    struct { int w, h; } resizeData;$/;"	member	line:50	union:__anon5::__anon6	typeref:struct:__anon5::__anon6::__anon9
-data	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  } data;$/;"	member	line:51	struct:__anon5	typeref:union:__anon5::__anon6
-NR_Event	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^} NR_Event;$/;"	typedef	line:52	typeref:struct:__anon5

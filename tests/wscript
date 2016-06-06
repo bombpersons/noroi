@@ -1,0 +1,34 @@
+
+#! /usr/bin/env python
+# encoding: utf-8
+
+import os
+
+def options(ctx):
+    ctx.add_option('--buildtests', action='store', default=True, help='Build the unit tests')
+
+def configure(ctx):
+    if ctx.options.buildtests:
+        ctx.env.BUILD_TESTS = True
+    else:
+        ctx.env.BUILD_TESTS = False
+
+def build(ctx):
+    if ctx.env.BUILD_TESTS:
+        # Copy over everything in our data folder.
+        for file in ctx.path.ant_glob('data/**/*'):
+            ctx(feature='subst', name='data_' + file.name, rule='cp ${SRC} ${TGT}', source=file, target=file.get_bld())
+
+        # Build individual tests for each *_test.c file
+        for file in ctx.path.ant_glob('src/**/*_test.c'):
+            ctx.program(source=[file], target='test_' + file.name.replace('_test.c', ''), includes=['include'], use='noroi unity', vnum='0.1');
+
+        ctx.add_post_fun(post)
+
+def post(ctx):
+    testDir = ctx.path.get_bld().find_dir("tests")
+    for file in testDir.ant_glob("*"):
+        print(file.name)
+        if os.access(file.abspath(), os.X_OK):
+            print("Executing " + file.name)
+            ctx.exec_command(file.abspath(), cwd=testDir.abspath())

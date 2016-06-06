@@ -1,28 +1,41 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
+import os
+
 APPNAME = 'noroi'
 VERSION = '0.1'
 
 top = '.'
 out = 'build'
 
+# Pretty horrible, but convenient.
+def __recurse(ctx):
+    for dir in os.listdir(ctx.path.abspath()):
+        if (os.path.isdir(dir)):
+            if os.path.isfile(os.path.join(dir, 'wscript')):
+                ctx.recurse(dir)
+
 def options(ctx):
-    ctx.load('compiler_cxx')
+    ctx.load('compiler_c')
     ctx.add_option('--debug', action='store', default=False, help='Build with debug symbols')
-    ctx.recurse('glad lib test')
+    __recurse(ctx)
 
 def configure(ctx):
-    ctx.load('compiler_cxx')
+    ctx.load('compiler_c')
     if ctx.options.debug == 'true':
         ctx.env.append_value('CFLAGS', ['-g', '-Wall'])
     else:
         ctx.env.append_value('CFLAGS', ['-O3'])
 
-    ctx.recurse('glad lib test')
+    print(ctx.env.CFLAGS)
+
+    __recurse(ctx)
 
 def build(ctx):
-    ctx.recurse('glad lib test')
+    if ctx.options.debug == 'true':
+        ctx.env.append_value('CFLAGS', ['-g', '-Wall'])
+    else:
+        ctx.env.append_value('CFLAGS', ['-O3'])
 
-def test(ctx):
-    return ctx.exec_command('build/test/noroi_test')
+    __recurse(ctx)

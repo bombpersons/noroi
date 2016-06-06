@@ -18,6 +18,6 @@ void NR_Font_Delete(NR_Font* font);
 void NR_Font_SetSize(NR_Font* font, int width, int height);
 
 // Draw a grid of characters
-void NR_Font_Draw(NR_Font* font, NR_Glyph* glyphs, int width, int height);
+bool NR_Font_Draw(NR_Font* font, const char* string, int width, int height);
 
 #endif

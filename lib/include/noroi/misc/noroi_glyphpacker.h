@@ -15,7 +15,7 @@ typedef struct {
   unsigned int bearingX;
   unsigned int bearingY;
   unsigned int advance;
-} NR_GlyphInfo;
+} NR_GlyphPacker_Glyph;
 
 // Handle
 typedef void* NR_GlyphPacker;
@@ -23,9 +23,7 @@ typedef void* NR_GlyphPacker;
 NR_GlyphPacker* NR_GlyphPacker_New(int width, int height, int maxPage);
 void NR_GlyphPacker_Delete(NR_GlyphPacker* packer);
 
-bool NR_GlyphPacker_AddGlyph(NR_GlyphPacker* packer, unsigned int codepoint, const NR_GlyphInfo* glyph);
-void NR_GlyphPacker_DeleteGlyph(NR_GlyphPacker* packer, unsigned int codepoint);
-
-bool NR_GlyphPacker_GetGlyph(NR_GlyphPacker* packer, unsigned int codepoint, NR_GlyphInfo* glyph);
+bool NR_GlyphPacker_Add(NR_GlyphPacker* packer, const NR_GlyphPacker_Glyph* glyph);
+bool NR_GlyphPacker_Find(NR_GlyphPacker* packer, unsigned int codepoint, NR_GlyphPacker_Glyph* glyph);
 
 #endif

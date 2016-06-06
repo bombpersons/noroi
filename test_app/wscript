@@ -3,21 +3,22 @@
 # encoding: utf-8
 
 def options(ctx):
-    ctx.add_option('--buildtest', action='store', default=True, help='Build the test application also.')
+    ctx.add_option('--buildtestapp', action='store', default=True, help='Build the test application also.')
 
 def configure(ctx):
-    if ctx.options.buildtest:
-        ctx.env.BUILD_TEST = True
+    if ctx.options.buildtestapp:
+        ctx.env.BUILD_TEST_APP = True
     else:
-        ctx.env.BUILD_TEST = False
+        ctx.env.BUILD_TEST_APP = False
 
 def build(ctx):
-    if ctx.env.BUILD_TEST:
+    if ctx.env.BUILD_TEST_APP:
         # Copy over everything in our data folder.
         for file in ctx.path.ant_glob('data/**/*'):
             ctx(feature='subst', name='data_' + file.name, rule='cp ${SRC} ${TGT}', source=file, target=file.get_bld())
 
         ctx.program(source=ctx.path.ant_glob('src/**/*.c'),
-                    target='noroi_test',
+                    target='noroi_test_app',
+                    includes=['include'],
                     use='noroi',
                     vnum='0.1')
