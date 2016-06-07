@@ -25,14 +25,10 @@ int main(int argc, char** argv) {
   if (hnd) {
     // Test font stuff.
     NR_Font_Init();
-    NR_Font* newFont = NR_Font_Load("data/Anonymous-Pro.ttf");
-    if (newFont) {
-      printf("loaded font\n");
-
-      NR_Font_Draw(newFont, &glyph, 1, 1);
-      NR_Font_Delete(newFont);
+    NR_Font* newFont = NR_Font_Load("data/font.ttf");
+    if (!newFont) {
+      printf("Couldn't load font!\n");
     }
-    NR_Font_Shutdown();
 
     NR_SetSize(hnd, 20, 30);
 
@@ -45,12 +41,15 @@ int main(int argc, char** argv) {
     //NR_RectangleFill(hnd, 0, 0, 5, 5, &glyph);
     NR_Clear(hnd, &glyph);
 
-    // Update the screen.
-    NR_SwapBuffers(hnd);
-
     NR_Event event = {};
     bool running = true;
     while (running) {
+      // Try drawing some text.
+      NR_Font_Draw(newFont, "This is some text. Hey some more text. Xylophone.", 1, 1);
+
+      // Update the screen.
+      NR_SwapBuffers(hnd);
+
       if (NR_PollEvent(hnd, &event)) {
         switch (event.type) {
           case NR_EVENT_QUIT:
@@ -66,6 +65,10 @@ int main(int argc, char** argv) {
         }
       }
     }
+
+    // Destroy our font.
+    NR_Font_Delete(newFont);
+    NR_Font_Shutdown();
 
     // Destroy our handle
     NR_DestroyHandle(hnd);

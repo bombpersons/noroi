@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -99,6 +100,9 @@ static void _glfwShouldCloseCallback(GLFWwindow* window) {
 static void _glfwWindowSizeCallback(GLFWwindow* window, int width, int height) {
   HandleType* hnd = (HandleType*)glfwGetWindowUserPointer(window);
 
+  // Adjust our viewport
+  glViewport(0, 0, width, height);
+
   NR_Event event;
   event.type = NR_EVENT_RESIZE;
   event.data.resizeData.w = width;
@@ -114,6 +118,7 @@ bool NR_Init() {
   // Intialize glfw.
   if (!glfwInit())
     return false;
+
   return true;
 }
 void NR_Shutdown() {
@@ -136,6 +141,14 @@ NR_Handle NR_CreateHandle() {
 
   // Make our opengl context current.
   glfwMakeContextCurrent(window);
+
+  // Initialize glad.
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    return (void*)0;
+  }
+
+  // Print some opengl info
+  printf("Using Opengl %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
   // Allocate some memory for our handle.
   HandleType* handle = malloc(sizeof(HandleType));
@@ -211,7 +224,8 @@ void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph) {}
 
 // Apply any changes.
 void NR_SwapBuffers(NR_Handle hnd) {
-
+  HandleType* h = (HandleType*)hnd;
+  glfwSwapBuffers(h->window);
 }
 
 #endif

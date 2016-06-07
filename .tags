@@ -112,36 +112,6 @@ NR_Rectangle	/home/bombpersons/projects/curse/lib/src/ncurses/noroi_terminal_ncu
 NR_Text	/home/bombpersons/projects/curse/lib/src/ncurses/noroi_terminal_ncurses.c	/^void NR_Text(NR_Handle hnd, int x, int y, const char* text) {$/;"	function	line:119	signature:(NR_Handle hnd, int x, int y, const char* text)
 NR_Clear	/home/bombpersons/projects/curse/lib/src/ncurses/noroi_terminal_ncurses.c	/^void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph) {$/;"	function	line:125	signature:(NR_Handle hnd, const NR_Glyph* glyph)
 NR_SwapBuffers	/home/bombpersons/projects/curse/lib/src/ncurses/noroi_terminal_ncurses.c	/^void NR_SwapBuffers(NR_Handle hnd) {$/;"	function	line:132	signature:(NR_Handle hnd)
-window	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^  GLFWwindow* window;$/;"	member	line:14	struct:__anon1	file:
-events	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^  NR_EventQueue* events;$/;"	member	line:15	struct:__anon1	file:
-HandleType	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^} HandleType;$/;"	typedef	line:16	typeref:struct:__anon1	file:
-_glfwErrorCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwErrorCallback(int error, const char* desc) {$/;"	function	line:19	file:	signature:(int error, const char* desc)
-ConvGLFWKey	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static NR_Key ConvGLFWKey(int key) {$/;"	function	line:23	file:	signature:(int key)
-ConvGLFWKeyMod	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static NR_KeyMod ConvGLFWKeyMod(int mods) {$/;"	function	line:27	file:	signature:(int mods)
-_glfwKeyCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {$/;"	function	line:31	file:	signature:(GLFWwindow* window, int key, int scancode, int action, int mods)
-_glfwCursorPosCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwCursorPosCallback(GLFWwindow* window, double x, double y) {$/;"	function	line:45	file:	signature:(GLFWwindow* window, double x, double y)
-ConvGLFWButtonMod	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static NR_Button ConvGLFWButtonMod(int button) {$/;"	function	line:55	file:	signature:(int button)
-_glfwMouseButtonCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {$/;"	function	line:64	file:	signature:(GLFWwindow* window, int button, int action, int mods)
-_glfwScrollCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwScrollCallback(GLFWwindow* window, double x, double y) {$/;"	function	line:74	file:	signature:(GLFWwindow* window, double x, double y)
-_glfwShouldCloseCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwShouldCloseCallback(GLFWwindow* window) {$/;"	function	line:85	file:	signature:(GLFWwindow* window)
-_glfwWindowSizeCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwWindowSizeCallback(GLFWwindow* window, int width, int height) {$/;"	function	line:99	file:	signature:(GLFWwindow* window, int width, int height)
-NR_Init	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^bool NR_Init() {$/;"	function	line:110
-NR_Shutdown	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_Shutdown() {$/;"	function	line:119
-NR_CreateHandle	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^NR_Handle NR_CreateHandle() {$/;"	function	line:124
-NR_DestroyHandle	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_DestroyHandle(NR_Handle hnd) {$/;"	function	line:170	signature:(NR_Handle hnd)
-NR_PollEvent	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^bool NR_PollEvent(NR_Handle hnd, NR_Event* event) {$/;"	function	line:180	signature:(NR_Handle hnd, NR_Event* event)
-NR_SetSize	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_SetSize(NR_Handle hnd, int width, int height) {}$/;"	function	line:190	signature:(NR_Handle hnd, int width, int height)
-NR_GetSize	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_GetSize(NR_Handle hnd, int* width, int* height) {}$/;"	function	line:191	signature:(NR_Handle hnd, int* width, int* height)
-NR_SetCaption	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_SetCaption(NR_Handle hnd, const char* caption) {}$/;"	function	line:194	signature:(NR_Handle hnd, const char* caption)
-NR_GetCaptionSize	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^int NR_GetCaptionSize(NR_Handle hnd) { return 0; }$/;"	function	line:195	signature:(NR_Handle hnd)
-NR_GetCaption	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_GetCaption(NR_Handle hnd, char* buf) {}$/;"	function	line:196	signature:(NR_Handle hnd, char* buf)
-NR_SetGlyph	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_SetGlyph(NR_Handle hnd, int x, int y, const NR_Glyph* glyph) {}$/;"	function	line:199	signature:(NR_Handle hnd, int x, int y, const NR_Glyph* glyph)
-NR_GetGlyph	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^NR_Glyph NR_GetGlyph(NR_Handle hnd, int x, int y) { NR_Glyph glyph = {}; return glyph; }$/;"	function	line:200	signature:(NR_Handle hnd, int x, int y)
-NR_RectangleFill	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_RectangleFill(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph) {}$/;"	function	line:203	signature:(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph)
-NR_Rectangle	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_Rectangle(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph) {}$/;"	function	line:204	signature:(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph)
-NR_Text	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_Text(NR_Handle hnd, int x, int y, const char* text) {}$/;"	function	line:207	signature:(NR_Handle hnd, int x, int y, const char* text)
-NR_Clear	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph) {}$/;"	function	line:210	signature:(NR_Handle hnd, const NR_Glyph* glyph)
-NR_SwapBuffers	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_SwapBuffers(NR_Handle hnd) {$/;"	function	line:213	signature:(NR_Handle hnd)
 NOROI_NOROI_INCLUDED	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^#define NOROI_NOROI_INCLUDED$/;"	macro	line:2
 NR_Handle	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^typedef void* NR_Handle;$/;"	typedef	line:8
 id	/home/bombpersons/projects/curse/lib/include/noroi/noroi.h	/^  uint8_t id;$/;"	member	line:12	struct:__anon1
@@ -906,23 +876,61 @@ START_QUEUE_TEST	/home/bombpersons/projects/curse/tests/src/glyphpacker_test.c	/
 END_QUEUE_TEST	/home/bombpersons/projects/curse/tests/src/glyphpacker_test.c	/^#define END_QUEUE_TEST /;"	macro	line:7	file:
 test_add_remove	/home/bombpersons/projects/curse/tests/src/glyphpacker_test.c	/^void test_add_remove() {$/;"	function	line:10
 main	/home/bombpersons/projects/curse/tests/src/glyphpacker_test.c	/^int main(int argc, char** argv) {$/;"	function	line:33	signature:(int argc, char** argv)
-test_draw	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^void test_draw() {$/;"	function	line:6
-main	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^int main(int argc, char** argv) {$/;"	function	line:17	signature:(int argc, char** argv)
-main	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^int main(int argc, char** argv) {$/;"	function	line:25	signature:(int argc, char** argv)
 NOROI_GLFW_FONT_INCLUDED	/home/bombpersons/projects/curse/lib/include/noroi/glfw/noroi_glfw_font.h	/^#define NOROI_GLFW_FONT_INCLUDED$/;"	macro	line:2
 NR_Font	/home/bombpersons/projects/curse/lib/include/noroi/glfw/noroi_glfw_font.h	/^typedef void* NR_Font;$/;"	typedef	line:7
-UTF8_ACCEPT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define UTF8_ACCEPT /;"	macro	line:13	file:
-UTF8_REJECT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define UTF8_REJECT /;"	macro	line:14	file:
-utf8d	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^static const uint8_t utf8d[] = {$/;"	variable	line:16	file:
-decode	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^decode(uint32_t* state, uint32_t* codep, uint32_t byte) {$/;"	function	line:34	file:	signature:(uint32_t* state, uint32_t* codep, uint32_t byte)
-g_freetypeLibrary	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^FT_Library g_freetypeLibrary;$/;"	variable	line:45
-g_initialized	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool g_initialized = false;$/;"	variable	line:46
-NR_Font_Init	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool NR_Font_Init() {$/;"	function	line:47
-NR_Font_Shutdown	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_Shutdown() {$/;"	function	line:61
-face	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  FT_Face face;$/;"	member	line:72	struct:__anon1	file:
-glyphpacker	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  NR_GlyphPacker* glyphpacker;$/;"	member	line:73	struct:__anon1	file:
-HandleType	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} HandleType;$/;"	typedef	line:74	typeref:struct:__anon1	file:
-NR_Font_Load	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^NR_Font* NR_Font_Load(const char* path) {$/;"	function	line:76	signature:(const char* path)
-NR_Font_Delete	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_Delete(NR_Font* font) {$/;"	function	line:100	signature:(NR_Font* font)
-NR_Font_SetSize	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_SetSize(NR_Font* font, int width, int height) {$/;"	function	line:114	signature:(NR_Font* font, int width, int height)
-NR_Font_Draw	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool NR_Font_Draw(NR_Font* font, const char* string, int width, int height) {$/;"	function	line:119	signature:(NR_Font* font, const char* string, int width, int height)
+test_draw	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^void test_draw() {$/;"	function	line:9
+main	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^int main(int argc, char** argv) {$/;"	function	line:29	signature:(int argc, char** argv)
+main	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^int main(int argc, char** argv) {$/;"	function	line:37	signature:(int argc, char** argv)
+window	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^  GLFWwindow* window;$/;"	member	line:15	struct:__anon1	file:
+events	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^  NR_EventQueue* events;$/;"	member	line:16	struct:__anon1	file:
+HandleType	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^} HandleType;$/;"	typedef	line:17	typeref:struct:__anon1	file:
+_glfwErrorCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwErrorCallback(int error, const char* desc) {$/;"	function	line:20	file:	signature:(int error, const char* desc)
+ConvGLFWKey	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static NR_Key ConvGLFWKey(int key) {$/;"	function	line:24	file:	signature:(int key)
+ConvGLFWKeyMod	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static NR_KeyMod ConvGLFWKeyMod(int mods) {$/;"	function	line:28	file:	signature:(int mods)
+_glfwKeyCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {$/;"	function	line:32	file:	signature:(GLFWwindow* window, int key, int scancode, int action, int mods)
+_glfwCursorPosCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwCursorPosCallback(GLFWwindow* window, double x, double y) {$/;"	function	line:46	file:	signature:(GLFWwindow* window, double x, double y)
+ConvGLFWButtonMod	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static NR_Button ConvGLFWButtonMod(int button) {$/;"	function	line:56	file:	signature:(int button)
+_glfwMouseButtonCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {$/;"	function	line:65	file:	signature:(GLFWwindow* window, int button, int action, int mods)
+_glfwScrollCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwScrollCallback(GLFWwindow* window, double x, double y) {$/;"	function	line:75	file:	signature:(GLFWwindow* window, double x, double y)
+_glfwShouldCloseCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwShouldCloseCallback(GLFWwindow* window) {$/;"	function	line:86	file:	signature:(GLFWwindow* window)
+_glfwWindowSizeCallback	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^static void _glfwWindowSizeCallback(GLFWwindow* window, int width, int height) {$/;"	function	line:100	file:	signature:(GLFWwindow* window, int width, int height)
+NR_Init	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^bool NR_Init() {$/;"	function	line:114
+NR_Shutdown	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_Shutdown() {$/;"	function	line:124
+NR_CreateHandle	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^NR_Handle NR_CreateHandle() {$/;"	function	line:129
+NR_DestroyHandle	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_DestroyHandle(NR_Handle hnd) {$/;"	function	line:183	signature:(NR_Handle hnd)
+NR_PollEvent	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^bool NR_PollEvent(NR_Handle hnd, NR_Event* event) {$/;"	function	line:193	signature:(NR_Handle hnd, NR_Event* event)
+NR_SetSize	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_SetSize(NR_Handle hnd, int width, int height) {}$/;"	function	line:203	signature:(NR_Handle hnd, int width, int height)
+NR_GetSize	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_GetSize(NR_Handle hnd, int* width, int* height) {}$/;"	function	line:204	signature:(NR_Handle hnd, int* width, int* height)
+NR_SetCaption	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_SetCaption(NR_Handle hnd, const char* caption) {}$/;"	function	line:207	signature:(NR_Handle hnd, const char* caption)
+NR_GetCaptionSize	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^int NR_GetCaptionSize(NR_Handle hnd) { return 0; }$/;"	function	line:208	signature:(NR_Handle hnd)
+NR_GetCaption	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_GetCaption(NR_Handle hnd, char* buf) {}$/;"	function	line:209	signature:(NR_Handle hnd, char* buf)
+NR_SetGlyph	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_SetGlyph(NR_Handle hnd, int x, int y, const NR_Glyph* glyph) {}$/;"	function	line:212	signature:(NR_Handle hnd, int x, int y, const NR_Glyph* glyph)
+NR_GetGlyph	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^NR_Glyph NR_GetGlyph(NR_Handle hnd, int x, int y) { NR_Glyph glyph = {}; return glyph; }$/;"	function	line:213	signature:(NR_Handle hnd, int x, int y)
+NR_RectangleFill	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_RectangleFill(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph) {}$/;"	function	line:216	signature:(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph)
+NR_Rectangle	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_Rectangle(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph) {}$/;"	function	line:217	signature:(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph)
+NR_Text	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_Text(NR_Handle hnd, int x, int y, const char* text) {}$/;"	function	line:220	signature:(NR_Handle hnd, int x, int y, const char* text)
+NR_Clear	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph) {}$/;"	function	line:223	signature:(NR_Handle hnd, const NR_Glyph* glyph)
+NR_SwapBuffers	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_SwapBuffers(NR_Handle hnd) {$/;"	function	line:226	signature:(NR_Handle hnd)
+PAGE_WIDTH	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define PAGE_WIDTH /;"	macro	line:14	file:
+PAGE_HEIGHT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define PAGE_HEIGHT /;"	macro	line:15	file:
+PAGE_COUNT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define PAGE_COUNT /;"	macro	line:16	file:
+UTF8_ACCEPT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define UTF8_ACCEPT /;"	macro	line:20	file:
+UTF8_REJECT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define UTF8_REJECT /;"	macro	line:21	file:
+utf8d	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^static const uint8_t utf8d[] = {$/;"	variable	line:23	file:
+decode	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^decode(uint32_t* state, uint32_t* codep, uint32_t byte) {$/;"	function	line:41	file:	signature:(uint32_t* state, uint32_t* codep, uint32_t byte)
+g_freetypeLibrary	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^FT_Library g_freetypeLibrary;$/;"	variable	line:52
+g_initialized	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool g_initialized = false;$/;"	variable	line:53
+NR_Font_Init	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool NR_Font_Init() {$/;"	function	line:54
+NR_Font_Shutdown	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_Shutdown() {$/;"	function	line:68
+face	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  FT_Face face;$/;"	member	line:79	struct:__anon1	file:
+glyphpacker	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  NR_GlyphPacker* glyphpacker;$/;"	member	line:80	struct:__anon1	file:
+pages	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint pages[PAGE_COUNT];$/;"	member	line:83	struct:__anon1	file:
+vao	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint vao;$/;"	member	line:86	struct:__anon1	file:
+vbo	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint vbo;$/;"	member	line:87	struct:__anon1	file:
+program	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint program;$/;"	member	line:90	struct:__anon1	file:
+HandleType	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} HandleType;$/;"	typedef	line:91	typeref:struct:__anon1	file:
+NR_Font_Load	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^NR_Font* NR_Font_Load(const char* path) {$/;"	function	line:93	signature:(const char* path)
+NR_Font_Delete	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_Delete(NR_Font* font) {$/;"	function	line:218	signature:(NR_Font* font)
+NR_Font_SetSize	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_SetSize(NR_Font* font, int width, int height) {$/;"	function	line:238	signature:(NR_Font* font, int width, int height)
+NR_Font_Draw	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool NR_Font_Draw(NR_Font* font, const char* string, int width, int height) {$/;"	function	line:243	signature:(NR_Font* font, const char* string, int width, int height)
+main	/home/bombpersons/projects/curse/test_app/src/main.c	/^int main(int argc, char** argv) {$/;"	function	line:9	signature:(int argc, char** argv)

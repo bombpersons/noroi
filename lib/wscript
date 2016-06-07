@@ -18,6 +18,10 @@ def configure(ctx):
         ctx.check_cfg(package='glfw3', args='--cflags --libs', uselib_store='glfw', mandatory=True)
         ctx.env.append_value('NOROI_LIB', ['glfw'])
 
+        # This is needed for glfw!
+        ctx.check_cc(lib='dl', uselib_store='dl', mandatory=True)
+        ctx.env.append_value('NOROI_LIB', ['dl'])
+
         # For text rendering
         ctx.check_cfg(package='freetype2', args='--cflags --libs', uselib_store='freetype', mandatory=True);
         ctx.env.append_value('NOROI_LIB', ['freetype']);
