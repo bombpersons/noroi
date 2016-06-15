@@ -134,7 +134,7 @@ NR_Handle NR_CreateHandle() {
   glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
   // Try to make a window.
-  GLFWwindow* window = glfwCreateWindow(640, 480, "Title", (void*)0, (void*)0);
+  GLFWwindow* window = glfwCreateWindow(400, 400, "Title", (void*)0, (void*)0);
   if (!window) {
     return (void*)0;
   }

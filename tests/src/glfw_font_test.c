@@ -16,7 +16,7 @@ void test_draw() {
   NR_Font* f = NR_Font_Load("data/font.ttf");
   TEST_ASSERT_MESSAGE(f, "Couldn't load data/font.ttf");
 
-  NR_Font_Draw(f, "Test!", 1024, 1024);
+  //NR_Font_Draw(f, "Test!", 1024, 1024);
 
   NR_Font_Delete(f);
   NR_Font_Shutdown();

@@ -12,8 +12,8 @@ typedef struct {
   unsigned int height;
   unsigned int page;
 
-  unsigned int bearingX;
-  unsigned int bearingY;
+  int bearingX;
+  int bearingY;
   unsigned int advance;
 } NR_GlyphPacker_Glyph;
 

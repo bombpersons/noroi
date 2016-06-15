@@ -876,11 +876,6 @@ START_QUEUE_TEST	/home/bombpersons/projects/curse/tests/src/glyphpacker_test.c	/
 END_QUEUE_TEST	/home/bombpersons/projects/curse/tests/src/glyphpacker_test.c	/^#define END_QUEUE_TEST /;"	macro	line:7	file:
 test_add_remove	/home/bombpersons/projects/curse/tests/src/glyphpacker_test.c	/^void test_add_remove() {$/;"	function	line:10
 main	/home/bombpersons/projects/curse/tests/src/glyphpacker_test.c	/^int main(int argc, char** argv) {$/;"	function	line:33	signature:(int argc, char** argv)
-NOROI_GLFW_FONT_INCLUDED	/home/bombpersons/projects/curse/lib/include/noroi/glfw/noroi_glfw_font.h	/^#define NOROI_GLFW_FONT_INCLUDED$/;"	macro	line:2
-NR_Font	/home/bombpersons/projects/curse/lib/include/noroi/glfw/noroi_glfw_font.h	/^typedef void* NR_Font;$/;"	typedef	line:7
-test_draw	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^void test_draw() {$/;"	function	line:9
-main	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^int main(int argc, char** argv) {$/;"	function	line:29	signature:(int argc, char** argv)
-main	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^int main(int argc, char** argv) {$/;"	function	line:37	signature:(int argc, char** argv)
 window	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^  GLFWwindow* window;$/;"	member	line:15	struct:__anon1	file:
 events	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^  NR_EventQueue* events;$/;"	member	line:16	struct:__anon1	file:
 HandleType	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^} HandleType;$/;"	typedef	line:17	typeref:struct:__anon1	file:
@@ -911,26 +906,45 @@ NR_Rectangle	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void N
 NR_Text	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_Text(NR_Handle hnd, int x, int y, const char* text) {}$/;"	function	line:220	signature:(NR_Handle hnd, int x, int y, const char* text)
 NR_Clear	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph) {}$/;"	function	line:223	signature:(NR_Handle hnd, const NR_Glyph* glyph)
 NR_SwapBuffers	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw.c	/^void NR_SwapBuffers(NR_Handle hnd) {$/;"	function	line:226	signature:(NR_Handle hnd)
+test_draw	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^void test_draw() {$/;"	function	line:9
+main	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^int main(int argc, char** argv) {$/;"	function	line:29	signature:(int argc, char** argv)
+main	/home/bombpersons/projects/curse/tests/src/glfw_font_test.c	/^int main(int argc, char** argv) {$/;"	function	line:37	signature:(int argc, char** argv)
+NOROI_GLFW_FONT_INCLUDED	/home/bombpersons/projects/curse/lib/include/noroi/glfw/noroi_glfw_font.h	/^#define NOROI_GLFW_FONT_INCLUDED$/;"	macro	line:2
+NR_Font	/home/bombpersons/projects/curse/lib/include/noroi/glfw/noroi_glfw_font.h	/^typedef void* NR_Font;$/;"	typedef	line:7
+main	/home/bombpersons/projects/curse/test_app/src/main.c	/^int main(int argc, char** argv) {$/;"	function	line:9	signature:(int argc, char** argv)
 PAGE_WIDTH	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define PAGE_WIDTH /;"	macro	line:14	file:
 PAGE_HEIGHT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define PAGE_HEIGHT /;"	macro	line:15	file:
 PAGE_COUNT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define PAGE_COUNT /;"	macro	line:16	file:
-UTF8_ACCEPT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define UTF8_ACCEPT /;"	macro	line:20	file:
-UTF8_REJECT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define UTF8_REJECT /;"	macro	line:21	file:
-utf8d	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^static const uint8_t utf8d[] = {$/;"	variable	line:23	file:
-decode	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^decode(uint32_t* state, uint32_t* codep, uint32_t byte) {$/;"	function	line:41	file:	signature:(uint32_t* state, uint32_t* codep, uint32_t byte)
-g_freetypeLibrary	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^FT_Library g_freetypeLibrary;$/;"	variable	line:52
-g_initialized	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool g_initialized = false;$/;"	variable	line:53
-NR_Font_Init	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool NR_Font_Init() {$/;"	function	line:54
-NR_Font_Shutdown	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_Shutdown() {$/;"	function	line:68
-face	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  FT_Face face;$/;"	member	line:79	struct:__anon1	file:
-glyphpacker	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  NR_GlyphPacker* glyphpacker;$/;"	member	line:80	struct:__anon1	file:
-pages	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint pages[PAGE_COUNT];$/;"	member	line:83	struct:__anon1	file:
-vao	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint vao;$/;"	member	line:86	struct:__anon1	file:
-vbo	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint vbo;$/;"	member	line:87	struct:__anon1	file:
-program	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint program;$/;"	member	line:90	struct:__anon1	file:
-HandleType	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} HandleType;$/;"	typedef	line:91	typeref:struct:__anon1	file:
-NR_Font_Load	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^NR_Font* NR_Font_Load(const char* path) {$/;"	function	line:93	signature:(const char* path)
-NR_Font_Delete	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_Delete(NR_Font* font) {$/;"	function	line:218	signature:(NR_Font* font)
-NR_Font_SetSize	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_SetSize(NR_Font* font, int width, int height) {$/;"	function	line:238	signature:(NR_Font* font, int width, int height)
-NR_Font_Draw	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool NR_Font_Draw(NR_Font* font, const char* string, int width, int height) {$/;"	function	line:243	signature:(NR_Font* font, const char* string, int width, int height)
-main	/home/bombpersons/projects/curse/test_app/src/main.c	/^int main(int argc, char** argv) {$/;"	function	line:9	signature:(int argc, char** argv)
+MAX_QUADS_PER_FLUSH	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define MAX_QUADS_PER_FLUSH /;"	macro	line:17	file:
+UTF8_ACCEPT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define UTF8_ACCEPT /;"	macro	line:21	file:
+UTF8_REJECT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define UTF8_REJECT /;"	macro	line:22	file:
+utf8d	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^static const uint8_t utf8d[] = {$/;"	variable	line:24	file:
+decode	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^decode(uint32_t* state, uint32_t* codep, uint32_t byte) {$/;"	function	line:42	file:	signature:(uint32_t* state, uint32_t* codep, uint32_t byte)
+g_freetypeLibrary	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^FT_Library g_freetypeLibrary;$/;"	variable	line:53
+g_initialized	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool g_initialized = false;$/;"	variable	line:54
+NR_Font_Init	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool NR_Font_Init() {$/;"	function	line:55
+NR_Font_Shutdown	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_Shutdown() {$/;"	function	line:69
+x	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLfloat x, y;$/;"	member	line:80	struct:__anon1	file:
+y	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLfloat x, y;$/;"	member	line:80	struct:__anon1	file:
+Vec2d	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} Vec2d;$/;"	typedef	line:81	typeref:struct:__anon1	file:
+pos	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  Vec2d pos;$/;"	member	line:84	struct:__anon2	file:
+texcoord	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  Vec2d texcoord;$/;"	member	line:85	struct:__anon2	file:
+Vertex	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} Vertex;$/;"	typedef	line:86	typeref:struct:__anon2	file:
+vertices	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  Vertex vertices[6];$/;"	member	line:89	struct:__anon3	file:
+Quad	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} Quad;$/;"	typedef	line:90	typeref:struct:__anon3	file:
+texture	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint texture;$/;"	member	line:93	struct:__anon4	file:
+vao	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint vao;$/;"	member	line:95	struct:__anon4	file:
+vbo	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint vbo;$/;"	member	line:96	struct:__anon4	file:
+curQuad	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  unsigned int curQuad;$/;"	member	line:97	struct:__anon4	file:
+Page	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} Page;$/;"	typedef	line:98	typeref:struct:__anon4	file:
+face	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  FT_Face face;$/;"	member	line:101	struct:__anon5	file:
+glyphpacker	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  NR_GlyphPacker* glyphpacker;$/;"	member	line:102	struct:__anon5	file:
+pages	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  Page* pages[PAGE_COUNT];$/;"	member	line:105	struct:__anon5	file:
+program	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint program;$/;"	member	line:108	struct:__anon5	file:
+HandleType	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} HandleType;$/;"	typedef	line:109	typeref:struct:__anon5	file:
+NR_Font_Load	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^NR_Font* NR_Font_Load(const char* path) {$/;"	function	line:111	signature:(const char* path)
+NR_Font_Delete	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_Delete(NR_Font* font) {$/;"	function	line:206	signature:(NR_Font* font)
+NR_Font_SetSize	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_SetSize(NR_Font* font, int width, int height) {$/;"	function	line:232	signature:(NR_Font* font, int width, int height)
+_getOrthographicProjection	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^static void _getOrthographicProjection(float left, float right, float bottom, float top, float near, float far, float* out) {$/;"	function	line:237	file:	signature:(float left, float right, float bottom, float top, float near, float far, float* out)
+_flush	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^static void _flush(NR_Font* font, Page* page) {$/;"	function	line:252	file:	signature:(NR_Font* font, Page* page)
+NR_Font_Draw	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool NR_Font_Draw(NR_Font* font, unsigned int* data, int width, int height) {$/;"	function	line:284	signature:(NR_Font* font, unsigned int* data, int width, int height)

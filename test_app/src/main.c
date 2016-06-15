@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
       printf("Couldn't load font!\n");
     }
 
-    NR_SetSize(hnd, 20, 30);
+    NR_SetSize(hnd, 20, 20);
 
     //NR_Clear(hnd, &glyph);
     NR_SetGlyph(hnd, 10, 10, &glyph);
@@ -41,16 +41,15 @@ int main(int argc, char** argv) {
     //NR_RectangleFill(hnd, 0, 0, 5, 5, &glyph);
     NR_Clear(hnd, &glyph);
 
+    unsigned int data[10 * 10];
+    for (int i = 0; i < 10 * 10; ++i) {
+      data[i] = (unsigned int)('0') + i;
+    }
+
     NR_Event event = {};
     bool running = true;
     while (running) {
-      // Try drawing some text.
-      NR_Font_Draw(newFont, "This is some text. Hey some more text. Xylophone.", 1, 1);
-
-      // Update the screen.
-      NR_SwapBuffers(hnd);
-
-      if (NR_PollEvent(hnd, &event)) {
+      while (NR_PollEvent(hnd, &event)) {
         switch (event.type) {
           case NR_EVENT_QUIT:
             running = false;
@@ -64,6 +63,12 @@ int main(int argc, char** argv) {
             break;
         }
       }
+
+      // Try drawing some text.
+      NR_Font_Draw(newFont, data, 10, 10);
+
+      // Update the screen.
+      NR_SwapBuffers(hnd);
     }
 
     // Destroy our font.

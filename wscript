@@ -23,13 +23,6 @@ def options(ctx):
 
 def configure(ctx):
     ctx.load('compiler_c')
-    if ctx.options.debug == 'true':
-        ctx.env.append_value('CFLAGS', ['-g', '-Wall'])
-    else:
-        ctx.env.append_value('CFLAGS', ['-O3'])
-
-    print(ctx.env.CFLAGS)
-
     __recurse(ctx)
 
 def build(ctx):

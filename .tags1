@@ -4,4 +4,39 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-main	/home/bombpersons/projects/curse/test_app/src/main.c	/^int main(int argc, char** argv) {$/;"	function	line:9	signature:(int argc, char** argv)
+PAGE_WIDTH	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define PAGE_WIDTH /;"	macro	line:14	file:
+PAGE_HEIGHT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define PAGE_HEIGHT /;"	macro	line:15	file:
+PAGE_COUNT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define PAGE_COUNT /;"	macro	line:16	file:
+MAX_QUADS_PER_FLUSH	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define MAX_QUADS_PER_FLUSH /;"	macro	line:17	file:
+UTF8_ACCEPT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define UTF8_ACCEPT /;"	macro	line:21	file:
+UTF8_REJECT	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^#define UTF8_REJECT /;"	macro	line:22	file:
+utf8d	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^static const uint8_t utf8d[] = {$/;"	variable	line:24	file:
+decode	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^decode(uint32_t* state, uint32_t* codep, uint32_t byte) {$/;"	function	line:42	file:	signature:(uint32_t* state, uint32_t* codep, uint32_t byte)
+g_freetypeLibrary	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^FT_Library g_freetypeLibrary;$/;"	variable	line:53
+g_initialized	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool g_initialized = false;$/;"	variable	line:54
+NR_Font_Init	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool NR_Font_Init() {$/;"	function	line:55
+NR_Font_Shutdown	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_Shutdown() {$/;"	function	line:69
+x	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLfloat x, y;$/;"	member	line:80	struct:__anon1	file:
+y	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLfloat x, y;$/;"	member	line:80	struct:__anon1	file:
+Vec2d	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} Vec2d;$/;"	typedef	line:81	typeref:struct:__anon1	file:
+pos	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  Vec2d pos;$/;"	member	line:84	struct:__anon2	file:
+texcoord	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  Vec2d texcoord;$/;"	member	line:85	struct:__anon2	file:
+Vertex	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} Vertex;$/;"	typedef	line:86	typeref:struct:__anon2	file:
+vertices	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  Vertex vertices[6];$/;"	member	line:89	struct:__anon3	file:
+Quad	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} Quad;$/;"	typedef	line:90	typeref:struct:__anon3	file:
+texture	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint texture;$/;"	member	line:93	struct:__anon4	file:
+vao	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint vao;$/;"	member	line:95	struct:__anon4	file:
+vbo	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint vbo;$/;"	member	line:96	struct:__anon4	file:
+curQuad	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  unsigned int curQuad;$/;"	member	line:97	struct:__anon4	file:
+Page	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} Page;$/;"	typedef	line:98	typeref:struct:__anon4	file:
+face	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  FT_Face face;$/;"	member	line:101	struct:__anon5	file:
+glyphpacker	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  NR_GlyphPacker* glyphpacker;$/;"	member	line:102	struct:__anon5	file:
+pages	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  Page* pages[PAGE_COUNT];$/;"	member	line:105	struct:__anon5	file:
+program	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^  GLuint program;$/;"	member	line:108	struct:__anon5	file:
+HandleType	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^} HandleType;$/;"	typedef	line:109	typeref:struct:__anon5	file:
+NR_Font_Load	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^NR_Font* NR_Font_Load(const char* path) {$/;"	function	line:111	signature:(const char* path)
+NR_Font_Delete	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_Delete(NR_Font* font) {$/;"	function	line:206	signature:(NR_Font* font)
+NR_Font_SetSize	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^void NR_Font_SetSize(NR_Font* font, int width, int height) {$/;"	function	line:232	signature:(NR_Font* font, int width, int height)
+_getOrthographicProjection	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^static void _getOrthographicProjection(float left, float right, float bottom, float top, float near, float far, float* out) {$/;"	function	line:237	file:	signature:(float left, float right, float bottom, float top, float near, float far, float* out)
+_flush	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^static void _flush(NR_Font* font, Page* page) {$/;"	function	line:252	file:	signature:(NR_Font* font, Page* page)
+NR_Font_Draw	/home/bombpersons/projects/curse/lib/src/glfw/noroi_glfw_font.c	/^bool NR_Font_Draw(NR_Font* font, unsigned int* data, int width, int height) {$/;"	function	line:284	signature:(NR_Font* font, unsigned int* data, int width, int height)
