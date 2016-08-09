@@ -24,12 +24,8 @@ int main(int argc, char** argv) {
   NR_Handle hnd = NR_CreateHandle();
   if (hnd) {
     // Test font stuff.
-    NR_Font_Init();
-    NR_Font* newFont = NR_Font_Load("data/font.ttf");
-    if (!newFont) {
-      printf("Couldn't load font!\n");
-    }
-
+    NR_SetFont(hnd, "data/font.ttf");
+    NR_SetFontSize(hnd, 40, 0);
     NR_SetSize(hnd, 20, 20);
 
     //NR_Clear(hnd, &glyph);
@@ -41,11 +37,6 @@ int main(int argc, char** argv) {
     //NR_RectangleFill(hnd, 0, 0, 5, 5, &glyph);
     NR_Clear(hnd, &glyph);
 
-    unsigned int data[10 * 10];
-    for (int i = 0; i < 10 * 10; ++i) {
-      data[i] = (unsigned int)('0') + i;
-    }
-
     NR_Event event = {};
     bool running = true;
     while (running) {
@@ -55,31 +46,17 @@ int main(int argc, char** argv) {
             running = false;
             break;
 
-          case NR_EVENT_RESIZE:
-            printf("Resized to (%i, %i)\n", event.data.resizeData.w, event.data.resizeData.h);
-            break;
-
           default:
             break;
         }
       }
 
-      // Try drawing some text.
-      NR_Font_Draw(newFont, data, 10, 10);
-
       // Update the screen.
-      NR_SwapBuffers(hnd);
+      NR_Render(hnd);
     }
-
-    // Destroy our font.
-    NR_Font_Delete(newFont);
-    NR_Font_Shutdown();
 
     // Destroy our handle
     NR_DestroyHandle(hnd);
-
-    NR_Glyph test = NR_GetGlyph(hnd, 0, 0);
-    printf("%c, bold: %d\n", test.c, test.bold);
 
   } else {
     printf("Couldn't create a handle.\n");

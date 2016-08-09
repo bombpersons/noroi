@@ -21,7 +21,7 @@ def build(ctx):
 
         # Build individual tests for each *_test.c file
         for file in ctx.path.ant_glob('src/**/*_test.c'):
-            ctx.program(source=[file], target='test_' + file.name.replace('_test.c', ''), includes=['include'], use='noroi unity', vnum='0.1');
+            ctx.program(source=[file], target='test_' + file.name.replace('_test.c', ''), includes=['include'], use='noroi unity', vnum='0.1')
 
         ctx.add_post_fun(post)
 

@@ -2,6 +2,7 @@
 
 #ifdef NOROI_USE_GLFW
 
+#include <noroi/glfw/noroi_glfw_font.h>
 #include <noroi/misc/noroi_event_queue.h>
 
 #include <stdio.h>
@@ -12,8 +13,25 @@
 #include <GLFW/glfw3.h>
 
 typedef struct {
+  // Window.
   GLFWwindow* window;
   NR_EventQueue* events;
+
+  // Font.
+  NR_Font font;
+  int fontWidth, fontHeight;
+
+  // Front and back buffers.
+  NR_Glyph *buff1, *buff2;
+  NR_Glyph **frontBuff, **backBuff;
+
+  // The current buffer for actually drawing the text.
+  // This takes into account stuff like flashing characters.
+  unsigned int* drawBuff;
+
+  // Width and height of our buffers.
+  int buffWidth, buffHeight;
+  bool buffSizeDirty;
 } HandleType;
 
 // Glfw errors...
@@ -27,6 +45,36 @@ static NR_Key ConvGLFWKey(int key) {
 
 static NR_KeyMod ConvGLFWKeyMod(int mods) {
   return NR_KEY_MOD_SHIFT;
+}
+
+// Update buffer sizes..
+static void _updateBufferSizes(HandleType* hnd, int width, int height) {
+  int oldWidth = hnd->buffWidth;
+  int oldHeight = hnd->buffHeight;
+  hnd->buffWidth = width / hnd->fontWidth;
+  hnd->buffHeight = height / hnd->fontHeight;
+  if (oldWidth != hnd->buffWidth || oldHeight != hnd->buffHeight) {
+
+    // Delete the buffers
+    if (hnd->buff1) free(hnd->buff1);
+    if (hnd->buff2) free(hnd->buff2);
+    if (hnd->drawBuff) free(hnd->drawBuff);
+
+    // TODO
+    // COPY OVER THE CONTENTS OF THE OLD BUFFER!
+
+    // Recreate them at the right size.
+    int bufSize = hnd->buffWidth * hnd->buffHeight;
+    hnd->buff1 = malloc(sizeof(NR_Glyph) * bufSize);
+    hnd->buff2 = malloc(sizeof(NR_Glyph) * bufSize);
+    hnd->drawBuff = malloc(sizeof(unsigned int) * bufSize);
+
+    // TEST CODE!
+    for (int i = 0; i < bufSize; ++i) {
+      hnd->drawBuff[i] = '0' + i;
+    }
+
+  }
 }
 
 static void _glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -108,6 +156,9 @@ static void _glfwWindowSizeCallback(GLFWwindow* window, int width, int height) {
   event.data.resizeData.w = width;
   event.data.resizeData.h = height;
   NR_EventQueue_Push(hnd->events, &event);
+
+  // Resize again so that we don't have any half characters visible.
+  glfwSetWindowSize(window, (width / hnd->fontWidth) * hnd->fontWidth, (height / hnd->fontHeight) * hnd->fontHeight);
 }
 
 // Initialize noroi
@@ -119,9 +170,16 @@ bool NR_Init() {
   if (!glfwInit())
     return false;
 
+  // Initialize fonts.
+  NR_Font_Init();
+
   return true;
 }
 void NR_Shutdown() {
+  // De-initialize fonts.
+  NR_Font_Shutdown();
+
+  // Terminate glfw.
   glfwTerminate();
 }
 
@@ -178,6 +236,21 @@ NR_Handle NR_CreateHandle() {
   // Resize callback
   glfwSetWindowSizeCallback(window, _glfwWindowSizeCallback);
 
+  // No font yet.
+  handle->font = (void*)0;
+  handle->fontWidth = 0;
+  handle->fontHeight = 25;
+
+  // Buffers
+  handle->buff1 = (NR_Glyph*)0;
+  handle->buff2 = (NR_Glyph*)0;
+  handle->frontBuff = &handle->buff1;
+  handle->backBuff = &handle->buff2;
+  handle->drawBuff = (unsigned int*)0;
+
+  handle->buffWidth = 0;
+  handle->buffHeight = 0;
+
   return (void*)handle;
 }
 void NR_DestroyHandle(NR_Handle hnd) {
@@ -185,8 +258,44 @@ void NR_DestroyHandle(NR_Handle hnd) {
   HandleType* h = (HandleType*)hnd;
   NR_EventQueue_Delete(h->events);
 
+  // Delete the font we potentially have allocated.
+  if (h->font)
+    NR_Font_Delete(h->font);
+
+  // De-allocate front and back buffers.
+  free(h->buff1);
+  free(h->buff2);
+  free(h->drawBuff);
+
   // Free the memory we allocated for our handle.
   free((void*)hnd);
+}
+
+// Set the font.
+bool NR_SetFont(NR_Handle hnd, const char* font) {
+  HandleType* h = (HandleType*)hnd;
+
+  // Delete the current font if we have one.
+  if (h->font)
+    NR_Font_Delete(h->font);
+  h->font = NR_Font_Load(font);
+
+  // Make sure the size is right.
+  NR_SetFontSize(hnd, h->fontWidth, h->fontHeight);
+}
+
+void NR_SetFontSize(NR_Handle hnd, int width, int height) {
+  HandleType* h = (HandleType*)hnd;
+
+  // Store the size.
+  h->fontWidth = width;
+  h->fontHeight = height;
+
+  // Make sure we have a font set..
+  if (h->font) {
+    NR_Font_SetSize(h->font, h->fontWidth, h->fontHeight);
+    NR_Font_GetSize(h->font, &h->fontWidth, &h->fontHeight);
+  }
 }
 
 // Events
@@ -200,8 +309,23 @@ bool NR_PollEvent(NR_Handle hnd, NR_Event* event) {
 }
 
 // Set / get the size of the window.
-void NR_SetSize(NR_Handle hnd, int width, int height) {}
-void NR_GetSize(NR_Handle hnd, int* width, int* height) {}
+void NR_SetSize(NR_Handle hnd, int width, int height) {
+  HandleType* h = (HandleType*)hnd;
+
+  // Get the required size of the window.
+  int reqWidth = h->fontWidth * width;
+  int reqHeight = h->fontHeight * height;
+
+  // Resize the window.
+  glfwSetWindowSize(h->window, reqWidth, reqHeight);
+}
+void NR_GetSize(NR_Handle hnd, int* width, int* height) {
+  HandleType* h = (HandleType*)hnd;
+  glfwGetWindowSize(h->window, width, height);
+
+  *width /= h->fontWidth;
+  *height /= h->fontHeight;
+}
 
 // Set / get the caption of the window.
 void NR_SetCaption(NR_Handle hnd, const char* caption) {}
@@ -225,6 +349,31 @@ void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph) {}
 // Apply any changes.
 void NR_SwapBuffers(NR_Handle hnd) {
   HandleType* h = (HandleType*)hnd;
+
+  // Swap our glyph buffers.
+}
+
+void NR_Render(NR_Handle hnd) {
+  HandleType* h = (HandleType*)hnd;
+
+  // Clear the background.
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  // Get the size of the screen so we can scale things properly.
+  int width, height;
+  glfwGetWindowSize(h->window, &width, &height);
+
+  // Potentially need to re-allocate buffers due to resize..
+  _updateBufferSizes(h, width, height);
+
+  // Draw the grid of text.
+  if (h->font) {
+    // Draw it.
+    NR_Font_Draw(h->font, h->drawBuff, h->buffWidth, h->buffHeight, width, height);
+  }
+
+  // Swap gl buffers.
   glfwSwapBuffers(h->window);
 }
 

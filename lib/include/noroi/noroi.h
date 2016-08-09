@@ -241,6 +241,10 @@ void NR_Shutdown();
 NR_Handle NR_CreateHandle();
 void NR_DestroyHandle(NR_Handle hnd);
 
+// Set the font.
+bool NR_SetFont(NR_Handle hnd, const char* font);
+void NR_SetFontSize(NR_Handle hnd, int width, int height);
+
 // Events
 bool NR_PollEvent(NR_Handle hnd, NR_Event* event);
 
@@ -269,5 +273,8 @@ void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph);
 
 // Apply any changes.
 void NR_SwapBuffers(NR_Handle hnd);
+
+// Render the current draw buffer.
+void NR_Render(NR_Handle hnd);
 
 #endif

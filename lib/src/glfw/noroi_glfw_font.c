@@ -99,6 +99,7 @@ typedef struct {
 
 typedef struct {
   FT_Face face;
+  int charWidth, charHeight;
   NR_GlyphPacker* glyphpacker;
 
   // Pages
@@ -127,7 +128,8 @@ NR_Font* NR_Font_Load(const char* path) {
   hnd->glyphpacker = NR_GlyphPacker_New(PAGE_WIDTH, PAGE_HEIGHT, PAGE_COUNT);
 
   // Set a default size.
-  NR_Font_SetSize((void*)hnd, 0, 100);
+  NR_Font_SetResolution((void*)hnd, 0, 25);
+  NR_Font_SetSize((void*)hnd, 0, 25);
 
   // Create a shader to draw with.
   const GLchar* vertexSource =
@@ -229,10 +231,43 @@ void NR_Font_Delete(NR_Font* font) {
   free(hnd);
 }
 
-void NR_Font_SetSize(NR_Font* font, int width, int height) {
+void NR_Font_SetResolution(NR_Font* font, int width, int height) {
   HandleType* hnd = (HandleType*)font;
   FT_Set_Pixel_Sizes(hnd->face, width, height);
+
+  // Invalidate all of the pages we have cached.
+  NR_GlyphPacker_Delete(hnd->glyphpacker);
+  hnd->glyphpacker = NR_GlyphPacker_New(PAGE_WIDTH, PAGE_HEIGHT, PAGE_COUNT);
 }
+
+void NR_Font_SetSize(NR_Font* font, int width, int height) {
+  HandleType* hnd = (HandleType*)font;
+
+  // Get the current size of a glyph in the font.
+  float maxWidth = hnd->face->bbox.xMax - hnd->face->bbox.xMin;
+  float maxHeight = hnd->face->bbox.yMax - hnd->face->bbox.yMin;
+
+  // Width is zero, so use the height and the aspect ratio to automatically calculate the width.
+  if (width == 0 && height != 0) {
+    width = (int)((float)height * (maxWidth / maxHeight));
+
+  // Height is zero, so use the width and the aspect ratio to automatically calculate the height.
+  } else if (height == 0 && width != 0) {
+    height = (int)((float)width * (maxHeight / maxWidth));
+  }
+
+  hnd->charWidth = width;
+  hnd->charHeight = height;
+}
+
+void NR_Font_GetSize(NR_Font* font, int* width, int* height) {
+  HandleType* hnd = (HandleType*)font;
+  *width = hnd->charWidth;
+  *height = hnd->charHeight;
+}
+
+#undef near
+#undef far
 
 static void _getOrthographicProjection(float left, float right, float bottom, float top, float near, float far, float* out) {
   out[0] = 2.0f / (right - left);
@@ -249,7 +284,7 @@ static void _getOrthographicProjection(float left, float right, float bottom, fl
   out[15] = 1;
 }
 
-static void _flush(NR_Font* font, Page* page) {
+static void _flush(NR_Font* font, Page* page, int width, int height) {
   HandleType* hnd = (HandleType*)font;
 
   glEnable(GL_BLEND);
@@ -264,7 +299,7 @@ static void _flush(NR_Font* font, Page* page) {
   glUniform1i(glGetUniformLocation(hnd->program, "sampler"), 0);
 
   GLfloat proj[16];
-  _getOrthographicProjection(0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, proj);
+  _getOrthographicProjection(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f, proj);
   glUniformMatrix4fv(glGetUniformLocation(hnd->program, "proj"), 1, true, proj);
 
   glBindVertexArray(page->vao);
@@ -281,29 +316,24 @@ static void _flush(NR_Font* font, Page* page) {
   page->curQuad = 0;
 }
 
-bool NR_Font_Draw(NR_Font* font, unsigned int* data, int width, int height) {
+bool NR_Font_Draw(NR_Font* font, unsigned int* data, int dataWidth, int dataHeight, int width, int height) {
   HandleType* hnd = (HandleType*)font;
-
-  // HACK
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
 
   // Where we are drawing to.
   // We don't need a matrix multiplacation in the shader
   // if we just generate the quads to fit the whole screen...
   float destX = 0;
   float destY = 0;
-  float destWidth = 1;
-  float destHeight = 1;
 
   // The size of cell in the grid
-  GLfloat cellWidth = (float)destWidth / (float)width;
-  GLfloat cellHeight = (float)destHeight / (float)height;
+  GLfloat cellWidth = (GLfloat)hnd->charWidth;//(float)destWidth / (float)dataWidth;
+  GLfloat cellHeight = (GLfloat)hnd->charHeight;//(float)destHeight / (float)dataHeight;
 
-  int totalSize = width * height;
+  // Loop through each item in the data we are trying to draw.
+  int totalSize = dataWidth * dataHeight;
   for (int i = 0; i < totalSize; ++i) {
-    int x = i % width;
-    int y = i / width;
+    int x = i % dataWidth;
+    int y = i / dataWidth;
     unsigned int codepoint = data[i];
 
     // Check if we can find this codepoint.
@@ -393,7 +423,7 @@ bool NR_Font_Draw(NR_Font* font, unsigned int* data, int width, int height) {
 
       // If we've gone over our maximum, flush first so we can draw some more!
       if (curPage->curQuad >= MAX_QUADS_PER_FLUSH)
-        _flush(font, curPage);
+        _flush(font, curPage, width, height);
 
       // Get the position of this glyph on texture in texture coordinates.
       GLfloat glyphTexX = (GLfloat)glyph.x / (GLfloat)PAGE_WIDTH;
@@ -454,7 +484,7 @@ bool NR_Font_Draw(NR_Font* font, unsigned int* data, int width, int height) {
   // Do a final flush for each page.
   for (int i = 0; i < PAGE_COUNT; ++i) {
     if (hnd->pages[i]) {
-      _flush(font, hnd->pages[i]);
+      _flush(font, hnd->pages[i], width, height);
     }
   }
 

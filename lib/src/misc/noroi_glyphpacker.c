@@ -165,7 +165,8 @@ bool NR_GlyphPacker_Add(NR_GlyphPacker* packer, const NR_GlyphPacker_Glyph* glyp
 		unsigned int page = 0;
 		bool inserted = false;
 		for (int i = 0; i < hnd->maxPage; ++i) {
-			if (RectTreeNode_Insert(hnd->pages[i], glyph->codepoint, glyph->width, glyph->height, &x, &y)) {
+			// +1 to width and height so that there is a 1 pixel border between glyphs.
+			if (RectTreeNode_Insert(hnd->pages[i], glyph->codepoint, glyph->width+1, glyph->height+1, &x, &y)) {
 				inserted = true;
 				page = i;
 				break;
