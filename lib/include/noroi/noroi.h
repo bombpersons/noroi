@@ -14,7 +14,7 @@ typedef struct {
 
 // Info for a glyph.
 typedef struct {
-  char c;
+  unsigned int codepoint;
 
   bool flash;
   bool bold;

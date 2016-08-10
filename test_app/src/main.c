@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
   NR_Glyph glyph;
   memset(&glyph, 0, sizeof(NR_Glyph));
 
-  glyph.c = '#';
+  glyph.codepoint = '#';
   glyph.flash = false;
   glyph.bold = true;
 
@@ -26,6 +26,8 @@ int main(int argc, char** argv) {
     // Test font stuff.
     NR_SetFont(hnd, "data/font.ttf");
     NR_SetFontSize(hnd, 40, 0);
+
+    // Set the size of the window (in characters)
     NR_SetSize(hnd, 20, 20);
 
     //NR_Clear(hnd, &glyph);
@@ -36,6 +38,7 @@ int main(int argc, char** argv) {
     //NR_Rectangle(hnd, 0, 0, 5, 5, &glyph);
     //NR_RectangleFill(hnd, 0, 0, 5, 5, &glyph);
     NR_Clear(hnd, &glyph);
+    NR_SwapBuffers(hnd);
 
     NR_Event event = {};
     bool running = true;
@@ -45,6 +48,10 @@ int main(int argc, char** argv) {
           case NR_EVENT_QUIT:
             running = false;
             break;
+
+           case NR_EVENT_RESIZE:
+             NR_Clear(hnd, &glyph);
+             break;
 
           default:
             break;

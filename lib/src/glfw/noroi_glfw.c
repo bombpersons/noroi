@@ -68,12 +68,13 @@ static void _updateBufferSizes(HandleType* hnd, int width, int height) {
     hnd->buff1 = malloc(sizeof(NR_Glyph) * bufSize);
     hnd->buff2 = malloc(sizeof(NR_Glyph) * bufSize);
     hnd->drawBuff = malloc(sizeof(unsigned int) * bufSize);
+  }
+}
 
-    // TEST CODE!
-    for (int i = 0; i < bufSize; ++i) {
-      hnd->drawBuff[i] = '0' + i;
-    }
-
+static void _updateDrawBuffer(HandleType* hnd) {
+  int buffSize = hnd->buffWidth * hnd->buffHeight;
+  for (int i = 0; i < buffSize; ++i) {
+    hnd->drawBuff[i] = (*hnd->frontBuff)[i].codepoint;
   }
 }
 
@@ -282,6 +283,8 @@ bool NR_SetFont(NR_Handle hnd, const char* font) {
 
   // Make sure the size is right.
   NR_SetFontSize(hnd, h->fontWidth, h->fontHeight);
+
+  return true;
 }
 
 void NR_SetFontSize(NR_Handle hnd, int width, int height) {
@@ -341,16 +344,37 @@ void NR_RectangleFill(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph*
 void NR_Rectangle(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph) {}
 
 // Draw text
-void NR_Text(NR_Handle hnd, int x, int y, const char* text) {}
+void NR_Text(NR_Handle hnd, int x, int y, const char* text) {
+
+}
 
 // Clear everything.
-void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph) {}
+void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph) {
+  HandleType* h = (HandleType*)hnd;
+
+  printf("front: %i\n", (int)*h->frontBuff);
+  printf("buff1: %i\n", (int)h->buff1);
+  printf("buff2: %i\n", (int)h->buff2);
+
+  int buffSize = h->buffWidth * h->buffHeight;
+  for (int i = 0; i < buffSize; ++i) {
+    (*h->backBuff)[i] = *glyph;
+    (*h->backBuff)[i].codepoint = 2;
+  }
+}
 
 // Apply any changes.
 void NR_SwapBuffers(NR_Handle hnd) {
   HandleType* h = (HandleType*)hnd;
 
   // Swap our glyph buffers.
+  if (h->frontBuff == &h->buff1) {
+    h->frontBuff = &h->buff2;
+    h->backBuff = &h->buff1;
+  } else {
+    h->frontBuff = &h->buff1;
+    h->backBuff = &h->buff2;
+  }
 }
 
 void NR_Render(NR_Handle hnd) {
@@ -366,6 +390,7 @@ void NR_Render(NR_Handle hnd) {
 
   // Potentially need to re-allocate buffers due to resize..
   _updateBufferSizes(h, width, height);
+  _updateDrawBuffer(h);
 
   // Draw the grid of text.
   if (h->font) {
