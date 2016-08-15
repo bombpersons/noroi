@@ -25,20 +25,10 @@ int main(int argc, char** argv) {
   if (hnd) {
     // Test font stuff.
     NR_SetFont(hnd, "data/font.ttf");
-    NR_SetFontSize(hnd, 40, 0);
+    NR_SetFontSize(hnd, 20, 0);
 
     // Set the size of the window (in characters)
     NR_SetSize(hnd, 20, 20);
-
-    //NR_Clear(hnd, &glyph);
-    NR_SetGlyph(hnd, 10, 10, &glyph);
-    NR_Text(hnd, 20, 20, "Hey, this is text!");
-
-    // Clear the screen to '#'
-    //NR_Rectangle(hnd, 0, 0, 5, 5, &glyph);
-    //NR_RectangleFill(hnd, 0, 0, 5, 5, &glyph);
-    NR_Clear(hnd, &glyph);
-    NR_SwapBuffers(hnd);
 
     NR_Event event = {};
     bool running = true;
@@ -49,9 +39,16 @@ int main(int argc, char** argv) {
             running = false;
             break;
 
-           case NR_EVENT_RESIZE:
-             NR_Clear(hnd, &glyph);
-             break;
+          case NR_EVENT_RESIZE:
+            NR_Clear(hnd, &glyph);
+
+            NR_Text(hnd, 2, 2, "Hey, this is text!");
+
+            NR_SwapBuffers(hnd);
+            break;
+
+          case NR_EVENT_MOUSE_PRESS:
+            break;
 
           default:
             break;

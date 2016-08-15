@@ -5,9 +5,11 @@
 #include <noroi/glfw/noroi_glfw_font.h>
 #include <noroi/misc/noroi_event_queue.h>
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -51,23 +53,42 @@ static NR_KeyMod ConvGLFWKeyMod(int mods) {
 static void _updateBufferSizes(HandleType* hnd, int width, int height) {
   int oldWidth = hnd->buffWidth;
   int oldHeight = hnd->buffHeight;
-  hnd->buffWidth = width / hnd->fontWidth;
-  hnd->buffHeight = height / hnd->fontHeight;
+  hnd->buffWidth = width;
+  hnd->buffHeight = height;
   if (oldWidth != hnd->buffWidth || oldHeight != hnd->buffHeight) {
 
-    // Delete the buffers
+    // Recreate them at the right size.
+    int bufSize = hnd->buffWidth * hnd->buffHeight;
+    NR_Glyph* buff1 = malloc(sizeof(NR_Glyph) * bufSize);
+    memset(buff1, 0, sizeof(NR_Glyph) * bufSize);
+
+    NR_Glyph* buff2 = malloc(sizeof(NR_Glyph) * bufSize);
+    memset(buff2, 0, sizeof(NR_Glyph) * bufSize);
+
+    unsigned int* drawBuff = malloc(sizeof(unsigned int) * bufSize);
+    memset(drawBuff, 0, sizeof(unsigned int) * bufSize);
+
+    // COPY OVER THE CONTENTS OF THE OLD BUFFER
+    for (int x = 0; x < oldWidth && x < hnd->buffWidth; ++x) {
+      for (int y = 0; y < oldHeight && y < hnd->buffHeight; ++y) {
+        buff1[x + y * hnd->buffWidth] = hnd->buff1[x + y * oldWidth];
+        buff2[x + y * hnd->buffWidth] = hnd->buff2[x + y * oldWidth];
+        drawBuff[x + y * hnd->buffWidth] = hnd->drawBuff[x + y * oldWidth];
+      }
+    }
+
+    // Delete the old buffers
     if (hnd->buff1) free(hnd->buff1);
     if (hnd->buff2) free(hnd->buff2);
     if (hnd->drawBuff) free(hnd->drawBuff);
 
-    // TODO
-    // COPY OVER THE CONTENTS OF THE OLD BUFFER!
+    // Assign the new buffers
+    hnd->buff1 = buff1;
+    hnd->buff2 = buff2;
+    hnd->drawBuff = drawBuff;
 
-    // Recreate them at the right size.
-    int bufSize = hnd->buffWidth * hnd->buffHeight;
-    hnd->buff1 = malloc(sizeof(NR_Glyph) * bufSize);
-    hnd->buff2 = malloc(sizeof(NR_Glyph) * bufSize);
-    hnd->drawBuff = malloc(sizeof(unsigned int) * bufSize);
+    printf("Resizing buffers: %i, %i\n", hnd->buffWidth, hnd->buffHeight);
+
   }
 }
 
@@ -152,14 +173,20 @@ static void _glfwWindowSizeCallback(GLFWwindow* window, int width, int height) {
   // Adjust our viewport
   glViewport(0, 0, width, height);
 
+  // Resize again so that we don't have any half characters visible.
+  int rWidth = (int)ceil((float)width / (float)hnd->fontWidth);
+  int rHeight = (int)ceil((float)height / (float)hnd->fontHeight);
+  glfwSetWindowSize(window, rWidth * hnd->fontWidth, rHeight * hnd->fontHeight);
+
+  // Potentially need to re-allocate buffers due to resize..
+  _updateBufferSizes(hnd, rWidth, rHeight);
+
+  // Push an event with the new size.
   NR_Event event;
   event.type = NR_EVENT_RESIZE;
-  event.data.resizeData.w = width;
-  event.data.resizeData.h = height;
+  event.data.resizeData.w = rWidth;
+  event.data.resizeData.h = rHeight;
   NR_EventQueue_Push(hnd->events, &event);
-
-  // Resize again so that we don't have any half characters visible.
-  glfwSetWindowSize(window, (width / hnd->fontWidth) * hnd->fontWidth, (height / hnd->fontHeight) * hnd->fontHeight);
 }
 
 // Initialize noroi
@@ -336,31 +363,21 @@ int NR_GetCaptionSize(NR_Handle hnd) { return 0; }
 void NR_GetCaption(NR_Handle hnd, char* buf) {}
 
 // Set/get a glyph
-void NR_SetGlyph(NR_Handle hnd, int x, int y, const NR_Glyph* glyph) {}
-NR_Glyph NR_GetGlyph(NR_Handle hnd, int x, int y) { NR_Glyph glyph = {}; return glyph; }
-
-// Draw a square
-void NR_RectangleFill(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph) {}
-void NR_Rectangle(NR_Handle hnd, int x, int y, int w, int h, const NR_Glyph* glyph) {}
-
-// Draw text
-void NR_Text(NR_Handle hnd, int x, int y, const char* text) {
-
-}
-
-// Clear everything.
-void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph) {
+void NR_SetGlyph(NR_Handle hnd, int x, int y, const NR_Glyph* glyph) {
   HandleType* h = (HandleType*)hnd;
+  if (x < 0 || x >= h->buffWidth)
+    return;
+  if (y < 0 || y >= h->buffHeight)
+    return;
 
-  printf("front: %i\n", (int)*h->frontBuff);
-  printf("buff1: %i\n", (int)h->buff1);
-  printf("buff2: %i\n", (int)h->buff2);
+  (*h->backBuff)[x + y * h->buffWidth] = *glyph;
+}
+NR_Glyph NR_GetGlyph(NR_Handle hnd, int x, int y) {
+  HandleType* h = (HandleType*)hnd;
+  assert(x >= 0 && x < h->buffWidth);
+  assert(y >= 0 && y < h->buffHeight);
 
-  int buffSize = h->buffWidth * h->buffHeight;
-  for (int i = 0; i < buffSize; ++i) {
-    (*h->backBuff)[i] = *glyph;
-    (*h->backBuff)[i].codepoint = 2;
-  }
+  return (*h->backBuff)[x + y * h->buffWidth];
 }
 
 // Apply any changes.
@@ -388,8 +405,7 @@ void NR_Render(NR_Handle hnd) {
   int width, height;
   glfwGetWindowSize(h->window, &width, &height);
 
-  // Potentially need to re-allocate buffers due to resize..
-  _updateBufferSizes(h, width, height);
+  // Update our draw buffer.
   _updateDrawBuffer(h);
 
   // Draw the grid of text.

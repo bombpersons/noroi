@@ -113,8 +113,13 @@ NR_Font* NR_Font_Load(const char* path) {
   // Attempt to load the font.
   FT_Face face;
   FT_Error err = FT_New_Face(g_freetypeLibrary, path, 0, &face);
-  if (err != 0)
+  if (err != 0) {
+    // Try treating the path as a font descriptor
+    // Get the font file data and attempt to load that.
+    
+
     return (void*)0;
+  }
 
   // Make sure we're using unicode mappings.
   FT_Select_Charmap(face, FT_ENCODING_UNICODE);
