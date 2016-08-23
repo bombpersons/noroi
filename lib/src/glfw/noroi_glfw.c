@@ -14,10 +14,18 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+// threads
+#include <tinycthread.h>
+
 typedef struct {
   // Window.
   GLFWwindow* window;
   NR_EventQueue* events;
+
+  // A thread to run polling and what not.
+  thrd_t threadId;
+  mtx_t mutexId;
+  bool running;
 
   // Font.
   NR_Font font;
@@ -88,7 +96,6 @@ static void _updateBufferSizes(HandleType* hnd, int width, int height) {
     hnd->drawBuff = drawBuff;
 
     printf("Resizing buffers: %i, %i\n", hnd->buffWidth, hnd->buffHeight);
-
   }
 }
 
@@ -189,6 +196,44 @@ static void _glfwWindowSizeCallback(GLFWwindow* window, int width, int height) {
   NR_EventQueue_Push(hnd->events, &event);
 }
 
+static int _threadPoll(void* data) {
+  HandleType* hnd = (HandleType*)data;
+
+  hnd->running = true;
+  while (hnd->running) {
+    // We don't want this running at the same time as loading a new font, etc.
+    mtx_lock(&hnd->mutexId);
+
+    // Make our opengl context current.
+    glfwMakeContextCurrent(hnd->window);
+
+    // Clear the background.
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Get the size of the screen so we can scale things properly.
+    int width, height;
+    glfwGetWindowSize(hnd->window, &width, &height);
+
+    // Update our draw buffer.
+    _updateDrawBuffer(hnd);
+
+    // Draw the grid of text.
+    if (hnd->font) {
+      // Draw it.
+      NR_Font_Draw(hnd->font, hnd->drawBuff, hnd->buffWidth, hnd->buffHeight, width, height);
+    }
+
+    // Swap gl buffers.
+    glfwSwapBuffers(hnd->window);
+
+    // Unlock
+    mtx_unlock(&hnd->mutexId);
+  }
+
+  return 1;
+}
+
 // Initialize noroi
 bool NR_Init() {
   // Set an error callback so we can get more error info!
@@ -279,11 +324,24 @@ NR_Handle NR_CreateHandle() {
   handle->buffWidth = 0;
   handle->buffHeight = 0;
 
+  // Create a mutex so we can prevent the two threads from interfering.
+  mtx_init(&handle->mutexId, mtx_plain | mtx_recursive);
+
+  // Create a thread to poll the window.
+  thrd_create(&handle->threadId, _threadPoll, (void*)handle);
+
+  // Return the handle.
   return (void*)handle;
 }
 void NR_DestroyHandle(NR_Handle hnd) {
   // Delete the event queue we allocated.
   HandleType* h = (HandleType*)hnd;
+
+  // Stop the thread and wait for it to finish.
+  h->running = false;
+  thrd_join(h->threadId, NULL);
+
+  // Delete the event queue.
   NR_EventQueue_Delete(h->events);
 
   // Delete the font we potentially have allocated.
@@ -303,6 +361,12 @@ void NR_DestroyHandle(NR_Handle hnd) {
 bool NR_SetFont(NR_Handle hnd, const char* font) {
   HandleType* h = (HandleType*)hnd;
 
+  // Lock
+  mtx_lock(&h->mutexId);
+
+  // Make sure our opengl context is current.
+  glfwMakeContextCurrent(h->window);
+
   // Delete the current font if we have one.
   if (h->font)
     NR_Font_Delete(h->font);
@@ -311,11 +375,19 @@ bool NR_SetFont(NR_Handle hnd, const char* font) {
   // Make sure the size is right.
   NR_SetFontSize(hnd, h->fontWidth, h->fontHeight);
 
+  // Unlock
+  mtx_unlock(&h->mutexId);
+
   return true;
 }
 
 void NR_SetFontSize(NR_Handle hnd, int width, int height) {
   HandleType* h = (HandleType*)hnd;
+
+  mtx_lock(&h->mutexId);
+
+  // Make sure our context is current in this thread.
+  glfwMakeContextCurrent(h->window);
 
   // Store the size.
   h->fontWidth = width;
@@ -326,6 +398,8 @@ void NR_SetFontSize(NR_Handle hnd, int width, int height) {
     NR_Font_SetSize(h->font, h->fontWidth, h->fontHeight);
     NR_Font_GetSize(h->font, &h->fontWidth, &h->fontHeight);
   }
+
+  mtx_unlock(&h->mutexId);
 }
 
 // Events
@@ -394,28 +468,28 @@ void NR_SwapBuffers(NR_Handle hnd) {
   }
 }
 
-void NR_Render(NR_Handle hnd) {
-  HandleType* h = (HandleType*)hnd;
-
-  // Clear the background.
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  // Get the size of the screen so we can scale things properly.
-  int width, height;
-  glfwGetWindowSize(h->window, &width, &height);
-
-  // Update our draw buffer.
-  _updateDrawBuffer(h);
-
-  // Draw the grid of text.
-  if (h->font) {
-    // Draw it.
-    NR_Font_Draw(h->font, h->drawBuff, h->buffWidth, h->buffHeight, width, height);
-  }
-
-  // Swap gl buffers.
-  glfwSwapBuffers(h->window);
-}
+// void NR_Render(NR_Handle hnd) {
+//   HandleType* h = (HandleType*)hnd;
+//
+//   // Clear the background.
+//   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//   glClear(GL_COLOR_BUFFER_BIT);
+//
+//   // Get the size of the screen so we can scale things properly.
+//   int width, height;
+//   glfwGetWindowSize(h->window, &width, &height);
+//
+//   // Update our draw buffer.
+//   _updateDrawBuffer(h);
+//
+//   // Draw the grid of text.
+//   if (h->font) {
+//     // Draw it.
+//     NR_Font_Draw(h->font, h->drawBuff, h->buffWidth, h->buffHeight, width, height);
+//   }
+//
+//   // Swap gl buffers.
+//   glfwSwapBuffers(h->window);
+// }
 
 #endif

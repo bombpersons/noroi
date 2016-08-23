@@ -24,8 +24,12 @@ int main(int argc, char** argv) {
   NR_Handle hnd = NR_CreateHandle();
   if (hnd) {
     // Test font stuff.
-    NR_SetFont(hnd, "data/font.ttf");
-    NR_SetFontSize(hnd, 20, 0);
+    if (!NR_SetFont(hnd, "Tahoma")) {
+      printf("Couldn't load font!\n");
+      return 0;
+    }
+
+    NR_SetFontSize(hnd, 40, 0);
 
     // Set the size of the window (in characters)
     NR_SetSize(hnd, 20, 20);
@@ -41,7 +45,6 @@ int main(int argc, char** argv) {
 
           case NR_EVENT_RESIZE:
             NR_Clear(hnd, &glyph);
-
             NR_Text(hnd, 2, 2, "Hey, this is text!");
 
             NR_SwapBuffers(hnd);
@@ -54,9 +57,6 @@ int main(int argc, char** argv) {
             break;
         }
       }
-
-      // Update the screen.
-      NR_Render(hnd);
     }
 
     // Destroy our handle

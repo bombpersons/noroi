@@ -19,6 +19,11 @@ void test_draw() {
   //NR_Font_Draw(f, "Test!", 1024, 1024);
 
   NR_Font_Delete(f);
+
+  f = 0;
+  f = NR_Font_Load("tahoma");
+  TEST_ASSERT_MESSAGE(f, "Couldn't load tahoma font!");
+
   NR_Font_Shutdown();
 
   NR_DestroyHandle(hnd);

@@ -274,7 +274,4 @@ void NR_Clear(NR_Handle hnd, const NR_Glyph* glyph);
 // Apply any changes.
 void NR_SwapBuffers(NR_Handle hnd);
 
-// Render the current draw buffer.
-void NR_Render(NR_Handle hnd);
-
 #endif

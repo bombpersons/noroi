@@ -30,8 +30,6 @@ void NR_Text(NR_Handle hnd, int x, int y, const char* text) {
     g.codepoint = (unsigned int)*c;
 
     NR_SetGlyph(hnd, x + (c - text), y, &g);
-
-    printf("%c\n", *c);
   }
 }
 

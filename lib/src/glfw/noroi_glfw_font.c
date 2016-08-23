@@ -2,6 +2,7 @@
 
 #ifdef NOROI_USE_GLFW
 
+#include <noroi/misc/noroi_font_retriever.h>
 #include <noroi/misc/noroi_glyphpacker.h>
 
 #include <glad/glad.h>
@@ -113,12 +114,23 @@ NR_Font* NR_Font_Load(const char* path) {
   // Attempt to load the font.
   FT_Face face;
   FT_Error err = FT_New_Face(g_freetypeLibrary, path, 0, &face);
+
   if (err != 0) {
     // Try treating the path as a font descriptor
     // Get the font file data and attempt to load that.
-    
+    unsigned int size = NR_FontRetrieval_GetFontDataSize(path);
+    if (size > 0) {
+      char* buff = malloc(sizeof(char) * size);
+      if (NR_FontRetrieval_GetFontData(path, buff, size)) {
+       err = FT_New_Memory_Face(g_freetypeLibrary, buff, size, 0, &face);
+      }
+      free(buff);
+    }
 
-    return (void*)0;
+    // Still couldn't load anything.
+    if (err != 0) {
+      return (void*)0;
+    }
   }
 
   // Make sure we're using unicode mappings.
@@ -156,9 +168,19 @@ NR_Font* NR_Font_Load(const char* path) {
     GLint success;
     GLchar log[512];
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-      glGetShaderInfoLog(vertexShader, sizeof(log), (void*)0, log);
+    if (success == GL_FALSE) {
+      GLint maxLength = 0;
+    	glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+      // Allocate space for log.
+      char* log = malloc(sizeof(char) * maxLength);
+
+      glGetShaderInfoLog(vertexShader, sizeof(char) * maxLength, &maxLength, log);
       printf("Font vertex shader compile error:\n %s\n", log);
+
+      // Free log
+      free(log);
+
       return (void*)0;
     }
   }
@@ -179,11 +201,20 @@ NR_Font* NR_Font_Load(const char* path) {
 
   {
     GLint success;
-    GLchar log[512];
     glGetShaderiv(fragShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-      glGetShaderInfoLog(fragShader, sizeof(log), (void*)0, log);
-      printf("Font fragment shader compile error:\n %s\n", log);
+    if (success == GL_FALSE) {
+      GLint maxLength = 0;
+    	glGetShaderiv(fragShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+      // Allocate space for log.
+      char* log = malloc(sizeof(char) * maxLength);
+
+      glGetShaderInfoLog(fragShader, sizeof(char) * maxLength, &maxLength, log);
+      printf("Font fragment shader compile error:\n%i\n", maxLength);
+
+      // Free log
+      free(log);
+
       return (void*)0;
     }
   }
