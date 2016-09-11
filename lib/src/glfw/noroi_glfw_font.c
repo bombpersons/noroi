@@ -122,7 +122,7 @@ NR_Font* NR_Font_Load(const char* path) {
     if (size > 0) {
       char* buff = malloc(sizeof(char) * size);
       if (NR_FontRetrieval_GetFontData(path, buff, size)) {
-       err = FT_New_Memory_Face(g_freetypeLibrary, buff, size, 0, &face);
+       err = FT_New_Memory_Face(g_freetypeLibrary, (unsigned char*)buff, size, 0, &face);
       }
       free(buff);
     }
@@ -166,7 +166,6 @@ NR_Font* NR_Font_Load(const char* path) {
 
   {
     GLint success;
-    GLchar log[512];
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (success == GL_FALSE) {
       GLint maxLength = 0;

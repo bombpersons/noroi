@@ -18,8 +18,18 @@ def configure(ctx):
         ctx.check_cfg(package='glfw3', args='--cflags --libs', uselib_store='glfw', mandatory=True)
         ctx.env.append_value('NOROI_LIB', ['glfw'])
 
+        # For interthread communication
+        ctx.check_cc(lib='zmq', uselib_store='zmq', mandatory=True)
+        ctx.env.append_value('NOROI_LIB', ['zmq'])
+
         # This is needed for glfw!
         if sys.platform == 'linux':
+            ctx.check_cc(lib='pthread', uselib_store='pthread', mandatory=True)
+            ctx.env.append_value('NOROI_LIB', ['pthread']);
+
+            ctx.check_cc(lib='m', uselib_store='m', mandatory=True)
+            ctx.env.append_value('NOROI_LIB', ['m']);
+
             ctx.check_cc(lib='dl', uselib_store='dl', mandatory=True)
             ctx.env.append_value('NOROI_LIB', ['dl'])
 
