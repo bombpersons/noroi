@@ -239,7 +239,9 @@ typedef enum {
   NR_Request_Type_SetCaption,
   NR_Request_Type_GetCaption,
   NR_Request_Type_SetGlyph,
-  NR_Request_Type_GetGlyph
+  NR_Request_Type_GetGlyph,
+  NR_Request_Type_Clear,
+  NR_Request_Type_SwapBuffers
 } NR_Request_Type;
 
 // http://stackoverflow.com/questions/2060974/how-to-include-a-dynamic-array-inside-a-struct-in-c
@@ -271,6 +273,10 @@ typedef struct {
   unsigned int x, y;
 } NR_Request_GetGlyph_Contents;
 
+typedef struct {
+  NR_Glyph glyph;
+} NR_Request_Clear_Contents;
+
 // Header for a response message.
 typedef enum {
   NR_Response_Type_Success,
@@ -278,7 +284,7 @@ typedef enum {
 
   NR_Response_Type_GetSize,
   NR_Response_Type_GetCaption,
-  NR_Response_Type_GetGlyph,
+  NR_Response_Type_GetGlyph
 
 } NR_Response_Type;
 

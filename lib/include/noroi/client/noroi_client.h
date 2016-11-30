@@ -11,7 +11,8 @@ NR_Client NR_Client_New(const char* requestAddress, const char* subscriberAddres
 void NR_Client_Delete(NR_Client client);
 
 // Manually send events and messages (Mostly for internal use)
-bool NR_Client_Send(NR_Client client, NR_Request_Type type, const void* contents, unsigned int size);
+bool NR_Client_Send(NR_Client client, NR_Request_Type type, const void* contents, unsigned int size,
+                                                            NR_Response_Header* received, unsigned int recievedSize);
 
 // Set the font.
 bool NR_Client_SetFont(NR_Client hnd, const char* font);
@@ -26,8 +27,7 @@ void NR_Client_GetSize(NR_Client client, int* width, int* height);
 
 // Set / get the caption of the window.
 void NR_Client_SetCaption(NR_Client client, const char* caption);
-int NR_Client_GetCaptionSize(NR_Client client);
-void NR_Client_GetCaption(NR_Client client, char* buf);
+void NR_Client_GetCaption(NR_Client client, char* buf, unsigned int size, unsigned int* bytesWritten);
 
 // Set/get a glyph
 void NR_Client_SetGlyph(NR_Client client, int x, int y, const NR_Glyph* glyph);

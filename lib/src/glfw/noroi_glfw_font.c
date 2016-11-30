@@ -110,7 +110,7 @@ typedef struct {
   GLuint program;
 } HandleType;
 
-NR_Font* NR_Font_Load(const char* path) {
+NR_Font NR_Font_Load(const char* path) {
   // Attempt to load the font.
   FT_Face face;
   FT_Error err = FT_New_Face(g_freetypeLibrary, path, 0, &face);
@@ -240,7 +240,7 @@ NR_Font* NR_Font_Load(const char* path) {
   return (void*)hnd;
 }
 
-void NR_Font_Delete(NR_Font* font) {
+void NR_Font_Delete(NR_Font font) {
   // Delete the font.
   HandleType* hnd = (HandleType*)font;
 
@@ -266,7 +266,7 @@ void NR_Font_Delete(NR_Font* font) {
   free(hnd);
 }
 
-void NR_Font_SetResolution(NR_Font* font, int width, int height) {
+void NR_Font_SetResolution(NR_Font font, int width, int height) {
   HandleType* hnd = (HandleType*)font;
   FT_Set_Pixel_Sizes(hnd->face, width, height);
 
@@ -275,7 +275,7 @@ void NR_Font_SetResolution(NR_Font* font, int width, int height) {
   hnd->glyphpacker = NR_GlyphPacker_New(PAGE_WIDTH, PAGE_HEIGHT, PAGE_COUNT);
 }
 
-void NR_Font_SetSize(NR_Font* font, int width, int height) {
+void NR_Font_SetSize(NR_Font font, int width, int height) {
   HandleType* hnd = (HandleType*)font;
 
   // Get the current size of a glyph in the font.
@@ -295,7 +295,7 @@ void NR_Font_SetSize(NR_Font* font, int width, int height) {
   hnd->charHeight = height;
 }
 
-void NR_Font_GetSize(NR_Font* font, int* width, int* height) {
+void NR_Font_GetSize(NR_Font font, int* width, int* height) {
   HandleType* hnd = (HandleType*)font;
   *width = hnd->charWidth;
   *height = hnd->charHeight;
@@ -319,7 +319,7 @@ static void _getOrthographicProjection(float left, float right, float bottom, fl
   out[15] = 1;
 }
 
-static void _flush(NR_Font* font, Page* page, int width, int height) {
+static void _flush(NR_Font font, Page* page, int width, int height) {
   HandleType* hnd = (HandleType*)font;
 
   glEnable(GL_BLEND);
@@ -351,14 +351,14 @@ static void _flush(NR_Font* font, Page* page, int width, int height) {
   page->curQuad = 0;
 }
 
-bool NR_Font_Draw(NR_Font* font, unsigned int* data, int dataWidth, int dataHeight, int width, int height) {
+bool NR_Font_Draw(NR_Font font, unsigned int* data, int dataWidth, int dataHeight, int startX, int startY, int width, int height) {
   HandleType* hnd = (HandleType*)font;
 
   // Where we are drawing to.
   // We don't need a matrix multiplacation in the shader
   // if we just generate the quads to fit the whole screen...
-  float destX = 0;
-  float destY = 0;
+  float destX = (float)startX;
+  float destY = (float)startY;
 
   // The size of cell in the grid
   GLfloat cellWidth = (GLfloat)hnd->charWidth;//(float)destWidth / (float)dataWidth;

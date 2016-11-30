@@ -46,40 +46,44 @@ void NR_Client_Delete(NR_Client client) {
   free(internal);
 }
 
-bool NR_Client_Send(NR_Client client, NR_Request_Type type, const void* contents, unsigned int size) {
+bool NR_Client_Send(NR_Client client, NR_Request_Type type, const void* contents, unsigned int contentSize,
+                                                            NR_Response_Header* received, unsigned int receivedSize) {
   InternalData* internal = (InternalData*)client;
 
   // Create the header + packet.
-  NR_Request_Header* header = malloc(sizeof(NR_Request_Header) + size);
+  NR_Request_Header* header = malloc(sizeof(NR_Request_Header) + contentSize);
   header->type = type;
-  header->size = size;
-  memcpy(header->contents, contents, size);
+  header->size = contentSize;
+  memcpy(header->contents, contents, contentSize);
 
   // Send the request to the server.
-  printf("[Client] Sending a request of type %i\n", header->type);
-  char buffer[1024];
+  //printf("[Client] Sending a request of type %i\n", header->type);
   zmq_send(internal->requestSocket, header, sizeof(NR_Request_Header) + header->size, 0);
 
   // Delete our header + packet.
   free(header);
   header = (void*)0;
 
+  // If a received buffer isn't specified use our own.
+  char tempBuffer[1024];
+  unsigned int bufferSize = sizeof(tempBuffer);
+  void* buffer = tempBuffer;
+
+  if (received) {
+    buffer = received;
+    bufferSize = receivedSize;
+  }
+
   // *fingers crossed* the server has some sort of response for us.
-  int bytes = zmq_recv(internal->requestSocket, buffer, sizeof(buffer), 0);
+  int bytes = zmq_recv(internal->requestSocket, buffer, bufferSize, 0);
   if (bytes != 0) {
 
     // Read the response header and decide what to do.
     NR_Response_Header* header = (NR_Response_Header*)buffer;
-    switch (header->type) {
-      // Server failed!
-      case NR_Response_Type_Failure:
-        printf("[Client] Server failed to fulfill request. %s\n", header->contents);
-        return false;
-      default:
-        break;
+    if (header->type == NR_Response_Type_Failure) {
+      printf("[Client] Server failed to fulfill request. %s\n", header->contents);
+      return false;
     }
-
-    printf("[Client] Recieved response with type id: %i\n", header->type);
 
   } else {
     printf("[Client] Did not recieve a response!\n");
@@ -90,14 +94,14 @@ bool NR_Client_Send(NR_Client client, NR_Request_Type type, const void* contents
 
 // Set the font.
 bool NR_Client_SetFont(NR_Client client, const char* font) {
-  return NR_Client_Send(client, NR_Request_Type_SetFont, font, strlen(font) + 1);
+  return NR_Client_Send(client, NR_Request_Type_SetFont, font, strlen(font) + 1, (void*)0, 0);
 }
 
 void NR_Client_SetFontSize(NR_Client client, int width, int height) {
   NR_Request_SetFontSize_Contents contents;
   contents.width = width;
   contents.height = height;
-  NR_Client_Send(client, NR_Request_Type_SetFontSize, &contents, sizeof(contents));
+  NR_Client_Send(client, NR_Request_Type_SetFontSize, &contents, sizeof(contents), (void*)0, 0);
 }
 
 // Events
@@ -126,25 +130,44 @@ void NR_Client_SetSize(NR_Client client, int width, int height) {
 }
 
 void NR_Client_GetSize(NR_Client client, int* width, int* height) {
+  // Store the result.
+  char buffer[1024];
+  NR_Response_Header* header = (NR_Response_Header*)buffer;
 
+  // Get the data from the server.
+  NR_Client_Send(client, NR_Request_Type_GetSize, (void*)0, 0, header, sizeof(buffer));
+
+  // Unpack the results.
+  NR_Response_GetSize_Contents* contents = (NR_Response_GetSize_Contents*)header->contents;
+  *width = contents->width;
+  *height = contents->height;
 }
 
 // Set / get the caption of the window.
 void NR_Client_SetCaption(NR_Client client, const char* caption) {
-
+  NR_Client_Send(client, NR_Request_Type_SetCaption, caption, strlen(caption), (void*)0, 0);
 }
 
-int NR_Client_GetCaptionSize(NR_Client client) {
-  return 0;
-}
+void NR_Client_GetCaption(NR_Client client, char* buf, unsigned int size, unsigned int* bytesWritten) {
+  // Store the response.
+  char buffer[1024];
+  NR_Response_Header* header = (NR_Response_Header*)buffer;
 
-void NR_Client_GetCaption(NR_Client client, char* buf) {
+  // Ask for a response.
+  NR_Client_Send(client, NR_Request_Type_GetCaption, (void*)0, 0, header, sizeof(buffer));
 
+  // Unpack the results.
+  *bytesWritten = header->size < size ? header->size : size;
+  memcpy(buf, header->contents, *bytesWritten);
 }
 
 // Set/get a glyph
 void NR_Client_SetGlyph(NR_Client client, int x, int y, const NR_Glyph* glyph) {
-
+  NR_Request_SetGlyph_Contents contents;
+  contents.x = x;
+  contents.y = y;
+  contents.glyph = *glyph;
+  NR_Client_Send(client, NR_Request_Type_SetGlyph, &contents, sizeof(contents), (void*)0, 0);
 }
 
 NR_Glyph NR_Client_GetGlyph(NR_Client client, int x, int y) {
@@ -160,7 +183,14 @@ void NR_Client_Rectangle(NR_Client client, int x, int y, int w, int h, const NR_
 void NR_Client_Text(NR_Client client, int x, int y, const char* text) {}
 
 // Clear everything.
-void NR_Client_Clear(NR_Client client, const NR_Glyph* glyph) {}
+void NR_Client_Clear(NR_Client client, const NR_Glyph* glyph) {
+  NR_Request_Clear_Contents contents;
+  contents.glyph = *glyph;
+
+  NR_Client_Send(client, NR_Request_Type_Clear, &contents, sizeof(contents), (void*)0, 0);
+}
 
 // Apply any changes.
-void NR_Client_SwapBuffers(NR_Client client) {}
+void NR_Client_SwapBuffers(NR_Client client) {
+  NR_Client_Send(client, NR_Request_Type_SwapBuffers, (void*)0, 0, (void*)0, 0);
+}

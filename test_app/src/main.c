@@ -13,14 +13,28 @@ int main(int argc, char** argv) {
   NR_GLFW_Server server = NR_GLFW_Server_New("tcp://*:12345", "tcp://*:12346");
   NR_Client client = NR_Client_New("tcp://localhost:12345", "tcp://localhost:12346");
 
+  NR_Client_SetCaption(client, "My Awesome Caption Text");
+  char buff[512];
+  unsigned int bytesWritten = 0;
+  NR_Client_GetCaption(client, buff, sizeof(buff), &bytesWritten);
+  printf("Caption set was: %s\n", buff);
+
   NR_Client_SetFont(client, "data/font.ttf");
   NR_Client_SetFontSize(client, 0, 25);
+
+  NR_Glyph hashGlyph;
+  hashGlyph.codepoint = '#';
 
   bool running = true;
   while (running) {
     NR_Event event;
     while (NR_Client_HandleEvent(client, &event)) {
       switch (event.type) {
+        case NR_EVENT_RESIZE:
+          NR_Client_Clear(client, &hashGlyph);
+          NR_Client_SwapBuffers(client);
+          break;
+
         case NR_EVENT_QUIT:
           running = false;
           break;

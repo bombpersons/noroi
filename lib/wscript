@@ -10,6 +10,9 @@ def configure(ctx):
 
     import sys
 
+    #use c99
+    ctx.env.append_value('CFLAGS', ['-std=c99'])
+
     if ctx.options.impl == 'gl':
         # For opengl extensions.
         ctx.env.append_value('NOROI_LIB', ['glad'])
@@ -41,7 +44,7 @@ def configure(ctx):
         ctx.check_cfg(package='freetype2', args='--cflags --libs', uselib_store='freetype', mandatory=True);
         ctx.env.append_value('NOROI_LIB', ['freetype']);
 
-        ctx.env.CFLAGS = ['-DNOROI_USE_GLFW']
+        ctx.env.append_value('CFLAGS', ['-DNOROI_USE_GLFW'])
 
     elif ctx.options.impl == 'terminal':
         if sys.platform == 'win32' or sys.platform == 'cygwin' or sys.platform == 'msys':
@@ -50,7 +53,7 @@ def configure(ctx):
             ctx.check_cfg(package='ncurses', args='--cflags --libs', uselib_store='ncurses', mandatory=True)
             ctx.env.append_value('NOROI_LIB', ['ncurses'])
 
-            ctx.env.CFLAGS = ['-DNOROI_TERMINAL_NCURSES']
+            ctx.env.append_value('CFLAGS', ['-DNOROI_TERMINAL_NCURSES'])
 
 def build(ctx):
     ctx.install_files('${PREFIX}/include', ctx.path.ant_glob('include/noroi/**/*.h'))
