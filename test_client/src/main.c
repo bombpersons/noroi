@@ -1,23 +1,22 @@
 #include <noroi/base/noroi.h>
-#include <noroi/base/noroi_event_queue.h>
-#include <noroi/glfw_server/noroi_glfw_font.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <noroi/glfw_server/noroi_glfw_server.h>
 #include <noroi/client/noroi_client.h>
 
 int main(int argc, char** argv) {
+  // Quit if we don't have an address to connect to.
+  if (argc < 3) {
+    printf("Usage: test_client tcp://request_address:123 tcp://subscribe_address:123\n");
+  }
+
   // Create a noroi context.
   NR_Context* context = NR_Context_New();
 
   // Create and connect the client to the server.
-  NR_Client client = NR_Client_New(context, "inproc://request", "inproc://subscribe");
-
-  // Create the server.
-  NR_GLFW_Server server = NR_GLFW_Server_New(context, "inproc://request", "inproc://subscribe");
+  NR_Client client = NR_Client_New(context, argv[1], argv[2]);
 
   // Set the caption and check if we set it correctly.
   NR_Client_SetCaption(client, "My Awesome Caption Text");
@@ -27,7 +26,7 @@ int main(int argc, char** argv) {
   printf("Caption set was: %s\n", buff);
 
   // Set the font to use.
-  NR_Client_SetFont(client, "data/font.ttf");
+  NR_Client_SetFont(client, "/usr/share/noroi_test_server/font.ttf");
   NR_Client_SetFontSize(client, 0, 25);
 
   // A glyph to test with.
@@ -53,14 +52,6 @@ int main(int argc, char** argv) {
         case NR_EVENT_MOUSE_MOVE:
           NR_Client_SetGlyph(client, event.data.mouseData.x, event.data.mouseData.y, &zeroGlyph);
           NR_Client_SwapBuffers(client);
-
-          {
-            NR_Glyph test;
-            if (NR_Client_GetGlyph(client, event.data.mouseData.x, event.data.mouseData.y, &test)) {
-              printf("%c\n", test.codepoint);
-            }
-          }
-
           break;
 
         case NR_EVENT_QUIT:
@@ -76,9 +67,6 @@ int main(int argc, char** argv) {
 
   // Shutdown the client
   NR_Client_Delete(client);
-
-  // Shutdown the server.
-  NR_GLFW_Server_Delete(server);
 
   // Destroy the context.
   NR_Context_Delete(context);

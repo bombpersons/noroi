@@ -13,10 +13,7 @@ def configure(ctx):
     ctx.env.append_value('CFLAGS', ['-std=c99'])
 
     # We need noroi_base
-    ctx.env.append_value('NOROI_GLFW_SERVER_LIB', ['noroi_base'])    
-
-    # For opengl extensions.
-    ctx.env.append_value('NOROI_GLFW_SERVER_LIB', ['glad'])
+    ctx.env.append_value('NOROI_GLFW_SERVER_LIB', ['noroi_base'])
 
     # For our window + opengl context.
     ctx.check_cfg(package='glfw3', args='--cflags --libs', uselib_store='glfw', mandatory=True)
@@ -27,9 +24,9 @@ def configure(ctx):
     ctx.env.append_value('NOROI_GLFW_SERVER_LIB', ['freetype']);
 
 def build(ctx):
-    ctx.install_files('${PREFIX}/include', ctx.path.ant_glob('include/noroi/glfw_server/**/*.h'))
+    ctx.install_files('${PREFIX}/include/noroi/glfw_server', ctx.path.ant_glob('include/noroi/glfw_server/**/*.h'))
 
-    ctx.stlib(source=ctx.path.ant_glob('src/**/*.c'),
+    ctx.shlib(source=ctx.path.ant_glob('src/**/*.c'),
               target='noroi_glfw_server',
               includes=['include'],
               export_includes=['include'],

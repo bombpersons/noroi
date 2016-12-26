@@ -190,7 +190,7 @@ NR_Font NR_Font_Load(const char* path) {
   {
     GLint success;
     GLchar log[512];
-    glGetShaderiv(fragShader, GL_LINK_STATUS, &success);
+    glGetProgramiv(hnd->program, GL_LINK_STATUS, &success);
     if (!success) {
       glGetShaderInfoLog(fragShader, sizeof(log), (void*)0, log);
       printf("Font shader link error:\n %s\n", log);
@@ -217,7 +217,7 @@ void NR_Font_Delete(NR_Font font) {
   // Delete opengl resources
   for (int i = 0; i < PAGE_COUNT; ++i) {
     if (hnd->pages[i]) {
-      glDeleteTextures(PAGE_COUNT, &hnd->pages[i]->texture);
+      glDeleteTextures(1, &hnd->pages[i]->texture);
       glDeleteVertexArrays(1, &hnd->pages[i]->vao);
       glDeleteBuffers(1, &hnd->pages[i]->vbo);
     }

@@ -1,0 +1,19 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+def options(ctx):
+    ctx.add_option('--buildtestclient', action='store', default=True, help='Build the test client also.')
+
+def configure(ctx):
+    if ctx.options.buildtestclient:
+        ctx.env.BUILD_TEST_CLIENT = True
+    else:
+        ctx.env.BUILD_TEST_CLIENT = False
+
+def build(ctx):
+    if ctx.env.BUILD_TEST_CLIENT:
+        ctx.program(source=ctx.path.ant_glob('src/**/*.c'),
+                    target='noroi_test_client',
+                    includes=['include'],
+                    use='noroi_client',
+                    vnum='0.1')

@@ -53,7 +53,7 @@ static void _successOrError(NR_Server_Base server, bool success, const char* err
         break; \
       } \
 
-static void _handleRequest(NR_Server_Base server, void* userData, void* data, unsigned int size) {
+static void _handleRequest(NR_Server_Base server, void* data, unsigned int size) {
   NR_Request_Header* requestHeader = (NR_Request_Header*)data;
   InternalData* internalData = (InternalData*)server;
 
@@ -61,36 +61,36 @@ static void _handleRequest(NR_Server_Base server, void* userData, void* data, un
   switch (requestHeader->type) {
     // Font face.
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_SetFont, internalData->callbacks.setFont) {
-      _successOrError(server, internalData->callbacks.setFont(userData, requestHeader->contents), "Error occurred calling SetFont.");
+      _successOrError(server, internalData->callbacks.setFont(server, requestHeader->contents), "Error occurred calling SetFont.");
     } NOROI_SERVER_BASE_HANDLE_REQUEST_END;
 
     // Font size.
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_SetFontSize, internalData->callbacks.setFontSize) {
       NR_Request_SetFontSize_Contents* contents = (NR_Request_SetFontSize_Contents*)requestHeader->contents;
-      _successOrError(server, internalData->callbacks.setFontSize(userData, contents->width, contents->height), "Error occurred calling SetFontSize.");
+      _successOrError(server, internalData->callbacks.setFontSize(server, contents->width, contents->height), "Error occurred calling SetFontSize.");
     } NOROI_SERVER_BASE_HANDLE_REQUEST_END;
 
     // Size of window.
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_GetSize, internalData->callbacks.getSize) {
       NR_Response_GetSize_Contents contents;
-      internalData->callbacks.getSize(userData, &contents.width, &contents.height);
+      internalData->callbacks.getSize(server, &contents.width, &contents.height);
       NR_Server_Base_Reply(server, NR_Response_Type_GetSize, &contents, sizeof(contents));
     } NOROI_SERVER_BASE_HANDLE_REQUEST_END;
 
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_SetSize, internalData->callbacks.setSize) {
       NR_Request_SetSize_Contents* contents = (NR_Request_SetSize_Contents*)requestHeader->contents;
-      _successOrError(server, internalData->callbacks.setSize(userData, contents->width, contents->height), "Error occurred calling SetSize.");
+      _successOrError(server, internalData->callbacks.setSize(server, contents->width, contents->height), "Error occurred calling SetSize.");
     } NOROI_SERVER_BASE_HANDLE_REQUEST_END;
 
     // The caption of the window.
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_SetCaption, internalData->callbacks.setCaption) {
-      _successOrError(server, internalData->callbacks.setCaption(userData, requestHeader->contents, requestHeader->size), "Error setting caption!");
+      _successOrError(server, internalData->callbacks.setCaption(server, requestHeader->contents, requestHeader->size), "Error setting caption!");
     } NOROI_SERVER_BASE_HANDLE_REQUEST_END;
 
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_GetCaption, internalData->callbacks.getCaption) {
       char buff[512];
       unsigned int bytesWritten = 0;
-      if (internalData->callbacks.getCaption(userData, buff, sizeof(buff), &bytesWritten)) {
+      if (internalData->callbacks.getCaption(server, buff, sizeof(buff), &bytesWritten)) {
         NR_Server_Base_Reply(server, NR_Response_Type_GetCaption, buff, bytesWritten);
       } else {
         const char* error = "Error getting caption!";
@@ -101,13 +101,13 @@ static void _handleRequest(NR_Server_Base server, void* userData, void* data, un
     // Glyph.
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_SetGlyph, internalData->callbacks.setGlyph) {
       NR_Request_SetGlyph_Contents* contents = (NR_Request_SetGlyph_Contents*)requestHeader->contents;
-      _successOrError(server, internalData->callbacks.setGlyph(userData, contents->x, contents->y, &contents->glyph), "Error occurred calling SetGlyph.");
+      _successOrError(server, internalData->callbacks.setGlyph(server, contents->x, contents->y, &contents->glyph), "Error occurred calling SetGlyph.");
     } NOROI_SERVER_BASE_HANDLE_REQUEST_END;
 
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_GetGlyph, internalData->callbacks.getGlyph) {
       NR_Request_GetGlyph_Contents* contents = (NR_Request_GetGlyph_Contents*)requestHeader->contents;
       NR_Response_GetGlyph_Contents response;
-      if (internalData->callbacks.getGlyph(userData, contents->x, contents->y, &response.glyph)) {
+      if (internalData->callbacks.getGlyph(server, contents->x, contents->y, &response.glyph)) {
         NR_Server_Base_Reply(server, NR_Response_Type_GetGlyph, &response, sizeof(response));
       } else {
         const char* error = "Error ocurred calling GetGlyph.";
@@ -118,24 +118,24 @@ static void _handleRequest(NR_Server_Base server, void* userData, void* data, un
     // Text.
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_Text, internalData->callbacks.text) {
       NR_Request_Text_Contents* contents = (NR_Request_Text_Contents*)requestHeader->contents;
-      _successOrError(server, internalData->callbacks.text(userData, contents->x, contents->y, contents->text), "Error ocurred calling Text");
+      _successOrError(server, internalData->callbacks.text(server, contents->x, contents->y, contents->text), "Error ocurred calling Text");
     } NOROI_SERVER_BASE_HANDLE_REQUEST_END;
 
     // Rectangle.
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_Rectangle, internalData->callbacks.rectangle) {
       NR_Request_Rectangle_Contents* contents = (NR_Request_Rectangle_Contents*)requestHeader->contents;
-      _successOrError(server, internalData->callbacks.rectangle(userData, contents->x, contents->y, contents->w, contents->h, contents->fill, &contents->glyph), "Error ocurred calling Rectangle");
+      _successOrError(server, internalData->callbacks.rectangle(server, contents->x, contents->y, contents->w, contents->h, contents->fill, &contents->glyph), "Error ocurred calling Rectangle");
     } NOROI_SERVER_BASE_HANDLE_REQUEST_END;
 
     // Clear.
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_Clear, internalData->callbacks.clear) {
       NR_Request_Clear_Contents* contents = (NR_Request_Clear_Contents*)requestHeader->contents;
-      _successOrError(server, internalData->callbacks.clear(userData, &contents->glyph), "Error occurred calling Clear.");
+      _successOrError(server, internalData->callbacks.clear(server, &contents->glyph), "Error occurred calling Clear.");
     } NOROI_SERVER_BASE_HANDLE_REQUEST_END;
 
     // Swap buffers.
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_SwapBuffers, internalData->callbacks.swapBuffers) {
-      _successOrError(server, internalData->callbacks.swapBuffers(userData), "Error occurred calling SwapBuffers.");
+      _successOrError(server, internalData->callbacks.swapBuffers(server), "Error occurred calling SwapBuffers.");
     } NOROI_SERVER_BASE_HANDLE_REQUEST_END;
 
     default:
@@ -155,7 +155,7 @@ static int _runServer(void* data) {
 
   // Initialization before we actually start.
   if (internal->callbacks.initialize) {
-    if (!internal->callbacks.initialize(internal->userData)) {
+    if (!internal->callbacks.initialize(data)) {
       // We failed to initialize somehow, fail gracefully.
       printf("[Error] Server failed to initialize!\n");
       internal->running = false;
@@ -175,7 +175,7 @@ static int _runServer(void* data) {
 
   // Okay, make sure that we resize the window to something.
   if (internal->callbacks.setSize) {
-    internal->callbacks.setSize(internal->userData, 20, 20);
+    internal->callbacks.setSize(data, 20, 20);
   }
 
   // Start running.
@@ -188,12 +188,12 @@ static int _runServer(void* data) {
       if (bytes == -1)
         break;
 
-      _handleRequest(data, internal->userData, buffer, bytes);
+      _handleRequest(data, buffer, bytes);
     }
 
     // Update our window.
     if (internal->callbacks.update)
-      internal->callbacks.update(data, internal->userData);
+      internal->callbacks.update(data);
   }
 
   return 0;
@@ -210,6 +210,9 @@ NR_Server_Base NR_Server_Base_New(NR_Context* context, const char* replyAddress,
   strcpy(internal->replyAddress, replyAddress);
   internal->publisherAddress = malloc(strlen(publisherAddress) + 1);
   strcpy(internal->publisherAddress, publisherAddress);
+
+  // User data
+  internal->userData = userData;
 
   // The NR_Context.
   internal->context = context;
@@ -265,4 +268,22 @@ void NR_Server_Base_Reply(NR_Server_Base server, NR_Response_Type type, const vo
 void NR_Server_Base_Event(NR_Server_Base server, NR_Event* event) {
   InternalData* internal = (InternalData*)server;
   zmq_send(internal->publisher, event, sizeof(NR_Event), 0);
+}
+
+// Get user data
+void* NR_Server_Base_GetUserData(NR_Server_Base server) {
+  InternalData* internal = (InternalData*)server;
+  return internal->userData;
+}
+
+// Trigger the server to stop.
+void NR_Server_Base_Quit(NR_Server_Base server) {
+  InternalData* internal = (InternalData*)server;
+  internal->running = false;
+}
+
+// Query whether or not the server has been stopped.
+bool NR_Server_Base_Running(NR_Server_Base server) {
+  InternalData* internal = (InternalData*)server;
+  return internal->running;
 }

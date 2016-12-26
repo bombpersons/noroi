@@ -50,7 +50,7 @@ decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
 }
 
 typedef struct {
-  // Keep a pointer to the base server so we can delete when we delete ourselves.
+  // Pointer to the base server
   NR_Server_Base baseServer;
 
   // Window.
@@ -58,6 +58,10 @@ typedef struct {
 
   // Whether not to keep the window open.
   bool running;
+
+  // For timing.
+  double lastTime;
+  int numFrames;
 
   // Font.
   NR_Font font;
@@ -253,6 +257,9 @@ static void _glfwShouldCloseCallback(GLFWwindow* window) {
   NR_Event event;
   event.type = NR_EVENT_QUIT;
   NR_Server_Base_Event(internal->baseServer, &event);
+
+  // Flag so that we should quit.
+  NR_Server_Base_Quit(internal->baseServer);
 }
 
 static void _glfwWindowSizeCallback(GLFWwindow* window, int width, int height) {
@@ -300,8 +307,8 @@ static void _uninit() {
 }
 
 // Server callbacks.
-static bool _initialize(void* userData) {
-  InternalData* internal = (InternalData*)userData;
+static bool _initialize(NR_Server_Base server) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
   // Set all the required options for GLFW
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -356,13 +363,20 @@ static bool _initialize(void* userData) {
   return true;
 }
 
-static void _update(NR_Server_Base server, void* userData) {
-  InternalData* internal = (InternalData*)userData;
+static void _update(NR_Server_Base server) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
   // Frame rate.
-  //double deltaTime = glfwGetTime();
-  //glfwSetTime(0.0);
-  //printf("Delta: %f\n", 1.0/deltaTime);
+  double currentTime = glfwGetTime();
+  internal->numFrames++;
+  if (currentTime - internal->lastTime >= 1.0) {
+    char buff[1024];
+    sprintf(buff, "(%i FPS) - %s", internal->numFrames, internal->caption ? internal->caption : "");
+    glfwSetWindowTitle(internal->window, buff);
+
+    internal->numFrames = 0;
+    internal->lastTime += 1.0;
+  }
 
   // Collect any events.
   glfwPollEvents();
@@ -402,21 +416,21 @@ static void _update(NR_Server_Base server, void* userData) {
 }
 
 // Callbacks.
-static bool _setSize(void* userData, unsigned int width, unsigned int height) {
-  InternalData* internal = (InternalData*)userData;
+static bool _setSize(NR_Server_Base server, unsigned int width, unsigned int height) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
   _updateBufferSizes(internal, width, height);
   return true;
 }
 
-static bool _getSize(void* userData, unsigned int* width, unsigned int* height) {
-  InternalData* internal = (InternalData*)userData;
+static bool _getSize(NR_Server_Base server, unsigned int* width, unsigned int* height) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
   *width = internal->buffWidth;
   *height = internal->buffHeight;
   return true;
 }
 
-static bool _setCaption(void* userData, const char* caption, unsigned int size) {
-  InternalData* internal = (InternalData*)userData;
+static bool _setCaption(NR_Server_Base server, const char* caption, unsigned int size) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
   glfwSetWindowTitle(internal->window, caption);
 
   // Store the name.
@@ -429,8 +443,8 @@ static bool _setCaption(void* userData, const char* caption, unsigned int size) 
   return true;
 }
 
-static bool _getCaption(void* userData, char* buf, unsigned int size, unsigned int* bytesWritten) {
-  InternalData* internal = (InternalData*)userData;
+static bool _getCaption(NR_Server_Base server, char* buf, unsigned int size, unsigned int* bytesWritten) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
   if (!internal->caption)
     return false;
 
@@ -443,8 +457,8 @@ static bool _getCaption(void* userData, char* buf, unsigned int size, unsigned i
   return false;
 }
 
-static bool _setFontSize(void* userData, unsigned int width, unsigned int height) {
-  InternalData* internal = (InternalData*)userData;
+static bool _setFontSize(NR_Server_Base server, unsigned int width, unsigned int height) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
   // Make sure our context is current in this thread.
   glfwMakeContextCurrent(internal->window);
@@ -466,8 +480,8 @@ static bool _setFontSize(void* userData, unsigned int width, unsigned int height
   return true;
 }
 
-static bool _getFontSize(void* userData, unsigned int* width, unsigned int* height) {
-  InternalData* internal = (InternalData*)userData;
+static bool _getFontSize(NR_Server_Base server, unsigned int* width, unsigned int* height) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
   *width = internal->fontWidth;
   *height = internal->fontHeight;
@@ -475,8 +489,8 @@ static bool _getFontSize(void* userData, unsigned int* width, unsigned int* heig
   return true;
 }
 
-static bool _setFont(void* userData, const char* font) {
-  InternalData* internal = (InternalData*)userData;
+static bool _setFont(NR_Server_Base server, const char* font) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
   // Make sure our opengl context is current.
   glfwMakeContextCurrent(internal->window);
@@ -494,13 +508,13 @@ static bool _setFont(void* userData, const char* font) {
   memcpy(internal->fontName, font, strlen(font));
 
   // Make sure the size is right.
-  _setFontSize(userData, internal->fontWidth, internal->fontHeight);
+  _setFontSize(server, internal->fontWidth, internal->fontHeight);
 
   return internal->font;
 }
 
-static bool _getFont(void* userData, char* fontName, unsigned int size) {
-  InternalData* internal = (InternalData*)userData;
+static bool _getFont(NR_Server_Base server, char* fontName, unsigned int size) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
   if (!internal->fontName)
     return false;
 
@@ -512,8 +526,8 @@ static bool _getFont(void* userData, char* fontName, unsigned int size) {
   return false;
 }
 
-static bool _setGlyph(void* userData, unsigned int x, unsigned int y, const NR_Glyph* glyph) {
-  InternalData* internal = (InternalData*)userData;
+static bool _setGlyph(NR_Server_Base server, unsigned int x, unsigned int y, const NR_Glyph* glyph) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
   if (x >= internal->buffWidth)
     return false;
@@ -524,8 +538,8 @@ static bool _setGlyph(void* userData, unsigned int x, unsigned int y, const NR_G
   return true;
 }
 
-static bool _getGlyph(void* userData, unsigned int x, unsigned int y, NR_Glyph* glyph) {
-  InternalData* internal = (InternalData*)userData;
+static bool _getGlyph(NR_Server_Base server, unsigned int x, unsigned int y, NR_Glyph* glyph) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
   if (x >= internal->buffWidth)
     return false;
@@ -536,7 +550,7 @@ static bool _getGlyph(void* userData, unsigned int x, unsigned int y, NR_Glyph* 
   return true;
 }
 
-static bool _text(void* userData, unsigned int x, unsigned int y, const char* text) {
+static bool _text(NR_Server_Base server, unsigned int x, unsigned int y, const char* text) {
   // Decode the text from utf-8.
   uint32_t codepoint;
   uint32_t state = 0;
@@ -547,7 +561,7 @@ static bool _text(void* userData, unsigned int x, unsigned int y, const char* te
     if (!decode(&state, &codepoint, text[i])) {
       NR_Glyph glyph;
       glyph.codepoint = codepoint;
-      _setGlyph(userData, x + count, y, &glyph);
+      _setGlyph(server, x + count, y, &glyph);
     }
 
   if (state != UTF8_ACCEPT)
@@ -555,31 +569,31 @@ static bool _text(void* userData, unsigned int x, unsigned int y, const char* te
   return true;
 }
 
-static bool _rectangle(void* userdata, unsigned int x, unsigned int y, unsigned int w, unsigned int h, bool fill, const NR_Glyph* glyph) {
+static bool _rectangle(NR_Server_Base server, unsigned int x, unsigned int y, unsigned int w, unsigned int h, bool fill, const NR_Glyph* glyph) {
   if (fill) {
     // Filled rectangle.
     for (int i = x; i < x+w; i++) {
       for (int j = y; j < y+h; j++) {
-        _setGlyph(userdata, i, j, glyph);
+        _setGlyph(server, i, j, glyph);
       }
     }
   } else {
     // Hollow rectangle.
     for (int i = x; i <= x+w; i++) {
-      _setGlyph(userdata, i, y, glyph);
-      _setGlyph(userdata, i, y+h, glyph);
+      _setGlyph(server, i, y, glyph);
+      _setGlyph(server, i, y+h, glyph);
     }
     for (int i = y; i <= y+h; i++) {
-      _setGlyph(userdata, x, i, glyph);
-      _setGlyph(userdata, x+w, i, glyph);
+      _setGlyph(server, x, i, glyph);
+      _setGlyph(server, x+w, i, glyph);
     }
   }
 
   return true;
 }
 
-static bool _swapBuffers(void* userData) {
-  InternalData* internal = (InternalData*)userData;
+static bool _swapBuffers(NR_Server_Base server) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
   // Swap the buffers by copying the back buffer into the front buffer.
   memcpy(*internal->frontBuff, *internal->backBuff, sizeof(NR_Glyph) * internal->buffWidth * internal->buffHeight);
@@ -595,8 +609,8 @@ static bool _swapBuffers(void* userData) {
   return true;
 }
 
-static bool _clear(void* userData, const NR_Glyph* glyph) {
-  InternalData* internal = (InternalData*)userData;
+static bool _clear(NR_Server_Base server, const NR_Glyph* glyph) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
   unsigned int buffSize = internal->buffWidth * internal->buffHeight;
   for (unsigned int i = 0; i < buffSize; ++i) {
@@ -607,8 +621,9 @@ static bool _clear(void* userData, const NR_Glyph* glyph) {
 }
 
 // Create / Destroy server instances.
-NR_GLFW_Server NR_GLFW_Server_New(NR_Context* context, const char* replyAddress, const char* publisherAddress) {
+NR_Server_Base NR_GLFW_Server_New(NR_Context* context, const char* replyAddress, const char* publisherAddress) {
   InternalData* internal = malloc(sizeof(InternalData));
+  memset(internal, 0, sizeof(InternalData));
 
   // Increase the server reference counter, initialize if it was 0
   if (glfwServerCount == 0) {
@@ -618,10 +633,6 @@ NR_GLFW_Server NR_GLFW_Server_New(NR_Context* context, const char* replyAddress,
     }
   }
   glfwServerCount++;
-
-  // Initialization of internal variables.
-  internal->caption = (void*)0;
-  internal->fontName = (void*)0;
 
   // Create a server.
   NR_Server_Base_Callbacks callbacks;
@@ -655,14 +666,14 @@ NR_GLFW_Server NR_GLFW_Server_New(NR_Context* context, const char* replyAddress,
                                             callbacks);
 
   // Return our handle.
-  return (void*)internal;
+  return internal->baseServer;
 }
 
-void NR_GLFW_Server_Delete(NR_GLFW_Server server) {
-  InternalData* internal = (InternalData*)server;
+void NR_GLFW_Server_Delete(NR_Server_Base server) {
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
   // Close server.
-  NR_Server_Base_Delete(internal->baseServer);
+  NR_Server_Base_Delete(server);
 
   // Delete the font we potentially have allocated.
   if (internal->font)

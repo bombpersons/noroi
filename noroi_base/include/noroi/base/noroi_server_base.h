@@ -5,28 +5,28 @@
 
 typedef void* NR_Server_Base;
 
-typedef bool(*NR_Server_Base_Initializer)(void*);
-typedef void(*NR_Server_Base_Updater)(NR_Server_Base, void*);
-typedef void(*NR_Server_Base_RequestHandler)(NR_Server_Base, void*, void*, unsigned int);
+typedef bool(*NR_Server_Base_Initializer)(NR_Server_Base);
+typedef void(*NR_Server_Base_Updater)(NR_Server_Base);
+typedef void(*NR_Server_Base_RequestHandler)(NR_Server_Base, void*, unsigned int);
 
-typedef bool(*NR_Server_Base_SetSize)(void*, unsigned int x, unsigned int y);
-typedef bool(*NR_Server_Base_GetSize)(void*, unsigned int* x, unsigned int* y);
-typedef bool(*NR_Server_Base_SetFont)(void*, const char* fontName);
-typedef bool(*NR_Server_Base_GetFont)(void*, char* fontName, unsigned int size);
-typedef bool(*NR_Server_Base_SetFontSize)(void*, unsigned int width, unsigned int height);
-typedef bool(*NR_Server_Base_GetFontSize)(void*, unsigned int* width, unsigned int* height);
+typedef bool(*NR_Server_Base_SetSize)(NR_Server_Base, unsigned int x, unsigned int y);
+typedef bool(*NR_Server_Base_GetSize)(NR_Server_Base, unsigned int* x, unsigned int* y);
+typedef bool(*NR_Server_Base_SetFont)(NR_Server_Base, const char* fontName);
+typedef bool(*NR_Server_Base_GetFont)(NR_Server_Base, char* fontName, unsigned int size);
+typedef bool(*NR_Server_Base_SetFontSize)(NR_Server_Base, unsigned int width, unsigned int height);
+typedef bool(*NR_Server_Base_GetFontSize)(NR_Server_Base, unsigned int* width, unsigned int* height);
 
-typedef bool(*NR_Server_Base_SetCaption)(void*, const char* caption, unsigned int size);
-typedef bool(*NR_Server_Base_GetCaption)(void*, char* buf, unsigned int size, unsigned int* bytesWritten);
+typedef bool(*NR_Server_Base_SetCaption)(NR_Server_Base, const char* caption, unsigned int size);
+typedef bool(*NR_Server_Base_GetCaption)(NR_Server_Base, char* buf, unsigned int size, unsigned int* bytesWritten);
 
-typedef bool(*NR_Server_Base_SetGlyph)(void*, unsigned int, unsigned int, const NR_Glyph*);
-typedef bool(*NR_Server_Base_GetGlyph)(void*, unsigned int, unsigned int, NR_Glyph*);
+typedef bool(*NR_Server_Base_SetGlyph)(NR_Server_Base, unsigned int, unsigned int, const NR_Glyph*);
+typedef bool(*NR_Server_Base_GetGlyph)(NR_Server_Base, unsigned int, unsigned int, NR_Glyph*);
 
-typedef bool(*NR_Server_Base_Text)(void*, unsigned int x, unsigned int y, const char* text);
-typedef bool(*NR_Server_Base_Rectangle)(void*, unsigned int x, unsigned int y, unsigned int w, unsigned int h, bool fill, const NR_Glyph* glyph);
+typedef bool(*NR_Server_Base_Text)(NR_Server_Base, unsigned int x, unsigned int y, const char* text);
+typedef bool(*NR_Server_Base_Rectangle)(NR_Server_Base, unsigned int x, unsigned int y, unsigned int w, unsigned int h, bool fill, const NR_Glyph* glyph);
 
-typedef bool(*NR_Server_Base_Clear)(void*, const NR_Glyph*);
-typedef bool(*NR_Server_Base_SwapBuffers)(void*);
+typedef bool(*NR_Server_Base_Clear)(NR_Server_Base, const NR_Glyph*);
+typedef bool(*NR_Server_Base_SwapBuffers)(NR_Server_Base);
 
 typedef struct {
   NR_Server_Base_Initializer initialize;
@@ -59,5 +59,14 @@ void NR_Server_Base_Delete(NR_Server_Base server);
 
 void NR_Server_Base_Reply(NR_Server_Base server, NR_Response_Type type, const void* data, unsigned int size);
 void NR_Server_Base_Event(NR_Server_Base server, NR_Event* event);
+
+// Get user data
+void* NR_Server_Base_GetUserData(NR_Server_Base server);
+
+// Trigger the server to stop.
+void NR_Server_Base_Quit(NR_Server_Base server);
+
+// Query whether or not the server has been stopped.
+bool NR_Server_Base_Running(NR_Server_Base server);
 
 #endif
