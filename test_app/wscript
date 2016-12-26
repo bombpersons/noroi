@@ -20,5 +20,5 @@ def build(ctx):
         ctx.program(source=ctx.path.ant_glob('src/**/*.c'),
                     target='noroi_test_app',
                     includes=['include'],
-                    use='noroi',
+                    use='noroi_client noroi_glfw_server',
                     vnum='0.1')

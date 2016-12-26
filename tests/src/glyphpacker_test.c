@@ -1,5 +1,5 @@
 #include <unity.h>
-#include <noroi/misc/noroi_glyphpacker.h>
+#include <noroi/glfw_server/noroi_glyphpacker.h>
 
 #include <stdlib.h>
 

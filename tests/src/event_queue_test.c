@@ -1,5 +1,5 @@
 #include <unity.h>
-#include <noroi/misc/noroi_event_queue.h>
+#include <noroi/base/noroi_event_queue.h>
 
 #define START_QUEUE_TEST \
   NR_EventQueue* q = NR_EventQueue_New();
