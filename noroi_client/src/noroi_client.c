@@ -147,7 +147,7 @@ void NR_Client_GetSize(NR_Client client, int* width, int* height) {
 
 // Set / get the caption of the window.
 void NR_Client_SetCaption(NR_Client client, const char* caption) {
-  NR_Client_Send(client, NR_Request_Type_SetCaption, caption, strlen(caption), (void*)0, 0);
+  NR_Client_Send(client, NR_Request_Type_SetCaption, caption, strlen(caption) + 1, (void*)0, 0);
 }
 
 void NR_Client_GetCaption(NR_Client client, char* buf, unsigned int size, unsigned int* bytesWritten) {
@@ -225,7 +225,7 @@ void NR_Client_Rectangle(NR_Client client, int x, int y, int w, int h, const NR_
 // Draw text
 void NR_Client_Text(NR_Client client, int x, int y, const char* text) {
   // Create the request.
-  int contentsSize = sizeof(NR_Request_Text_Contents) + strlen(text);
+  int contentsSize = sizeof(NR_Request_Text_Contents) + strlen(text) + 1;
   NR_Request_Text_Contents* contents = (NR_Request_Text_Contents*)malloc(contentsSize);
   contents->x = x;
   contents->y = y;
