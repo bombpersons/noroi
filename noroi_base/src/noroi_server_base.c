@@ -184,7 +184,7 @@ static int _runServer(void* data) {
     // Handle any requests.
     char buffer[1024];
     while (true) {
-      int bytes = zmq_recv(internal->responder, buffer, 1024, ZMQ_DONTWAIT);
+      int bytes = zmq_recv(internal->responder, buffer, 1024, ZMQ_NOBLOCK);
       if (bytes == -1)
         break;
 

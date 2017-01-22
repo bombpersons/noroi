@@ -15,6 +15,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <noroi/base/tinycthread.h>
+
 // Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 // See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
 #define UTF8_ACCEPT 0
@@ -70,6 +72,11 @@ typedef struct {
 
   // The caption on the window.
   char* caption;
+
+  // Draw thread.
+  bool keepDrawing;
+  thrd_t drawThread;
+  mtx_t drawMutex;
 
   // Front and back buffers.
   NR_Glyph *buff1, *buff2;
@@ -127,6 +134,9 @@ static bool ConvPixelToGird(InternalData* internal, int* outX, int* outY, int in
 
 // Update buffer sizes..
 static void _updateBufferSizes(InternalData* internal, int width, int height) {
+  // Having to resize the drawbuffers, so lock the drawing mutex.
+  mtx_lock(&internal->drawMutex);
+
   int oldWidth = internal->buffWidth;
   int oldHeight = internal->buffHeight;
   internal->buffWidth = width;
@@ -170,6 +180,8 @@ static void _updateBufferSizes(InternalData* internal, int width, int height) {
     event.data.resizeData.h = internal->buffHeight;
     NR_Server_Base_Event(internal->baseServer, &event);
   }
+
+  mtx_unlock(&internal->drawMutex);
 }
 
 static void _updateDrawBuffer(InternalData* internal) {
@@ -306,6 +318,70 @@ static void _uninit() {
   glfwTerminate();
 }
 
+static int _draw(void* data) {
+  NR_Server_Base server = (NR_Server_Base)data;
+  InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
+
+  // Draw loop.
+  while (internal->keepDrawing) {
+    // Make our opengl context current.
+    glfwMakeContextCurrent(internal->window);
+
+    // Clear the background.
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Get the size of the screen so we can scale things properly.
+    int width, height;
+    glfwGetWindowSize(internal->window, &width, &height);
+
+    // Lock the draw mutex here.
+    mtx_lock(&internal->drawMutex);
+
+    // Update the title of the window with the FPS
+    double currentTime = glfwGetTime();
+    internal->numFrames++;
+    if (currentTime - internal->lastTime >= 1.0) {
+      char buff[1024];
+      sprintf(buff, "(%i FPS) - %s", internal->numFrames, internal->caption ? internal->caption : "");
+      glfwSetWindowTitle(internal->window, buff);
+
+      internal->numFrames = 0;
+      internal->lastTime += 1.0;
+    }
+
+    // Make our opengl context current.
+    glfwMakeContextCurrent(internal->window);
+
+    // Update our draw buffer.
+    _updateDrawBuffer(internal);
+
+    // Draw the grid of text.
+    if (internal->buffWidth && internal->buffHeight && internal->font) {
+      // Draw it in the center.
+      int totalPixelX = internal->fontWidth * internal->buffWidth;
+      int totalPixelY = internal->fontHeight * internal->buffHeight;
+      int diffX = width - totalPixelX;
+      int diffY = height - totalPixelY;
+      int startX = diffX / 2;
+      int startY = diffY / 2;
+
+      NR_Font_Draw(internal->font, internal->drawBuff,
+                   internal->buffWidth, internal->buffHeight,
+                   startX, startY,
+                   width, height);
+    }
+
+    // Unlock the mutex.
+    mtx_unlock(&internal->drawMutex);
+
+    // Swap gl buffers.
+    glfwSwapBuffers(internal->window);
+  }
+
+  return true;
+}
+
 // Server callbacks.
 static bool _initialize(NR_Server_Base server) {
   InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
@@ -345,6 +421,9 @@ static bool _initialize(NR_Server_Base server) {
   glfwSetWindowCloseCallback(window, _glfwShouldCloseCallback);
   glfwSetWindowSizeCallback(window, _glfwWindowSizeCallback);
 
+  // Turn off vsync.
+  glfwSwapInterval(0);
+
   // No font yet.
   internal->font = (void*)0;
   internal->fontWidth = 0;
@@ -360,59 +439,23 @@ static bool _initialize(NR_Server_Base server) {
   internal->buffWidth = 0;
   internal->buffHeight = 0;
 
+  // Create a mutex to synchronise the frontbuffer between the drawing thread and update thread.
+  if (mtx_init(&internal->drawMutex, mtx_plain) != thrd_success)
+    return false;
+
+  // Start the draw thread.
+  internal->keepDrawing = true;
+  if (thrd_create(&internal->drawThread, _draw, (void*)server) != thrd_success)
+    return false;
+
   return true;
 }
 
 static void _update(NR_Server_Base server) {
   InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
-  // Frame rate.
-  double currentTime = glfwGetTime();
-  internal->numFrames++;
-  if (currentTime - internal->lastTime >= 1.0) {
-    char buff[1024];
-    sprintf(buff, "(%i FPS) - %s", internal->numFrames, internal->caption ? internal->caption : "");
-    glfwSetWindowTitle(internal->window, buff);
-
-    internal->numFrames = 0;
-    internal->lastTime += 1.0;
-  }
-
   // Collect any events.
   glfwPollEvents();
-
-  // Make our opengl context current.
-  glfwMakeContextCurrent(internal->window);
-
-  // Clear the background.
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  // Get the size of the screen so we can scale things properly.
-  int width, height;
-  glfwGetWindowSize(internal->window, &width, &height);
-
-  // Update our draw buffer.
-  _updateDrawBuffer(internal);
-
-  // Draw the grid of text.
-  if (internal->buffWidth && internal->buffHeight && internal->font) {
-    // Draw it in the center.
-    int totalPixelX = internal->fontWidth * internal->buffWidth;
-    int totalPixelY = internal->fontHeight * internal->buffHeight;
-    int diffX = width - totalPixelX;
-    int diffY = height - totalPixelY;
-    int startX = diffX / 2;
-    int startY = diffY / 2;
-
-    NR_Font_Draw(internal->font, internal->drawBuff,
-                 internal->buffWidth, internal->buffHeight,
-                 startX, startY,
-                 width, height);
-  }
-
-  // Swap gl buffers.
-  glfwSwapBuffers(internal->window);
 }
 
 // Callbacks.
@@ -595,8 +638,14 @@ static bool _rectangle(NR_Server_Base server, unsigned int x, unsigned int y, un
 static bool _swapBuffers(NR_Server_Base server) {
   InternalData* internal = (InternalData*)NR_Server_Base_GetUserData(server);
 
+  // Lock the draw mutex here.
+  mtx_lock(&internal->drawMutex);
+
   // Swap the buffers by copying the back buffer into the front buffer.
   memcpy(*internal->frontBuff, *internal->backBuff, sizeof(NR_Glyph) * internal->buffWidth * internal->buffHeight);
+
+  // Unlock.
+  mtx_unlock(&internal->drawMutex);
 
   // if (internal->frontBuff == &internal->buff1) {
   //   internal->frontBuff = &internal->buff2;
@@ -674,6 +723,14 @@ void NR_GLFW_Server_Delete(NR_Server_Base server) {
 
   // Close server.
   NR_Server_Base_Delete(server);
+
+  // Stop the draw thread.
+  internal->keepDrawing = false;
+  thrd_join(internal->drawThread, (int*)0);
+
+  // Destroy the thread and mutex
+  thrd_detach(internal->drawThread);
+  mtx_destroy(&internal->drawMutex);
 
   // Delete the font we potentially have allocated.
   if (internal->font)
