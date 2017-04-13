@@ -38,7 +38,7 @@ void NR_Client_RectangleFill(NR_Client client, int x, int y, int w, int h, const
 void NR_Client_Rectangle(NR_Client client, int x, int y, int w, int h, const NR_Glyph* glyph);
 
 // Draw text
-void NR_Client_Text(NR_Client client, int x, int y, const char* text);
+void NR_Client_Text(NR_Client client, int x, int y, const char* text, unsigned int color, unsigned int bgColor, bool flash);
 
 // Clear everything.
 void NR_Client_Clear(NR_Client client, const NR_Glyph* glyph);

@@ -3,18 +3,156 @@
 #include <noroi/glfw_server/noroi_font_retriever.h>
 #include <noroi/glfw_server/noroi_glyphpacker.h>
 
-#include <glad/glad.h>
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+
+#include <glad/glad.h>
+
+#include <stddef.h>
 
 // Freetype.
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+// Include shaders.
+#include <noroi/glfw_server/shaders/fragment.h>
+#include <noroi/glfw_server/shaders/geometry.h>
+#include <noroi/glfw_server/shaders/vertex.h>
+
 #define PAGE_WIDTH 1024
 #define PAGE_HEIGHT 1024
 #define PAGE_COUNT 10
-#define MAX_QUADS_PER_FLUSH 2048
+#define MAX_VERTICES_PER_FLUSH 2048
 
+// Utility function for loading a shader.
+GLuint loadShader(const char* source, GLenum type) {
+  // Create a shader to draw with.
+  GLuint shader = glCreateShader(type);
+  glShaderSource(shader, 1, (const GLchar**)&source, (void*)0);
+  glCompileShader(shader);
+
+  printf("Compiling shader: %s\n", source);
+
+  // Compile it.
+  GLint success;
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+  if (success == GL_FALSE) {
+    GLint maxLength = 0;
+  	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+    // Allocate space for log.
+    char* log = malloc(sizeof(char) * maxLength);
+
+    // Get name of shader type.
+    const char* shaderTypeString;
+    if (type == GL_GEOMETRY_SHADER) shaderTypeString = "geometry";
+    if (type == GL_VERTEX_SHADER) shaderTypeString = "vertex";
+    if (type == GL_FRAGMENT_SHADER) shaderTypeString = "fragment";
+
+    glGetShaderInfoLog(shader, sizeof(char) * maxLength, &maxLength, log);
+    printf("Error compiling %s shader: %s\n", shaderTypeString, log);
+
+    // Free log
+    free(log);
+
+    return 0;
+  }
+
+  return shader;
+}
+
+// Link shaders together into a single program.
+GLuint linkProgram(GLuint* shaders, int count) {
+  // Create the program, attache the shaders and link the program.
+  GLuint program = glCreateProgram();
+  for (int i = 0; i < count; ++i) {
+    glAttachShader(program, shaders[i]);
+  }
+  glLinkProgram(program);
+
+  // Get the status of the linking.
+  GLint success;
+  GLchar log[512];
+  glGetProgramiv(program, GL_LINK_STATUS, &success);
+  if (!success) {
+    glGetProgramInfoLog(program, sizeof(log), (void*)0, log);
+    printf("Font shader link error:\n %s\n", log);
+    return 0;
+  }
+
+  return program;
+}
+
+// Vectors
+typedef struct {
+  GLfloat x, y;
+} Vec2d;
+
+typedef struct {
+  GLfloat x, y, z;
+} Vec3d;
+
+typedef struct {
+  GLfloat x, y, z, w;
+} Vec4d;
+
+// Vertex flags.
+typedef enum {
+  VERTEX_FLAGS_FLASHING = 1,
+  VERTEX_FLAGS_ITALICS = 2,
+  VERTEX_FLAGS_BOLD = 4
+} VertexFlags;
+
+// Define a vertex in our vertex buffer.
+typedef struct {
+  // Colors for the ghyph and the background.
+  Vec3d color;
+  Vec3d bgColor;
+
+  // Rect for the glyph.
+  Vec4d glyphRect;
+
+  // Our texture coordinates.
+  Vec4d textureRect;
+
+  // Rect for the background color rect.
+  Vec4d bgRect;
+
+  // Glyph options.
+  unsigned char flags;
+} Vertex;
+
+// Defines a single page of glyphs.
+typedef struct {
+  GLuint texture;
+  GLuint vao;
+  GLuint vbo;
+  unsigned int current;
+} Page;
+
+// Internal representation of NR_Font
+typedef struct {
+  // The actual font.
+  FT_Face face;
+
+  // Maximum char width and height.
+  int charWidth, charHeight;
+
+  // Packed textures containing the font glyphs.
+  NR_GlyphPacker* glyphpacker;
+
+  // Pages
+  Page* pages[PAGE_COUNT];
+
+  // A VBO and VAO to draw the background colors.
+  GLuint bgVao;
+  GLuint bgVbo;
+
+  // A shader to draw characters with.
+  GLuint program;
+} HandleType;
+
+// Initialize freetype.
 FT_Library g_freetypeLibrary;
 bool g_initialized = false;
 bool NR_Font_Init() {
@@ -31,6 +169,7 @@ bool NR_Font_Init() {
   return true;
 }
 
+// Shutdown freetype.
 void NR_Font_Shutdown() {
   if (g_initialized) {
     // De-initialize freetype.
@@ -40,40 +179,7 @@ void NR_Font_Shutdown() {
   }
 }
 
-// Internal representation of NR_Font
-typedef struct {
-  GLfloat x, y;
-} Vec2d;
-
-typedef struct {
-  Vec2d pos;
-  Vec2d texcoord;
-} Vertex;
-
-typedef struct {
-  Vertex vertices[6];
-} Quad;
-
-typedef struct {
-  GLuint texture;
-
-  GLuint vao;
-  GLuint vbo;
-  unsigned int curQuad;
-} Page;
-
-typedef struct {
-  FT_Face face;
-  int charWidth, charHeight;
-  NR_GlyphPacker* glyphpacker;
-
-  // Pages
-  Page* pages[PAGE_COUNT];
-
-  // A shader to draw it with.
-  GLuint program;
-} HandleType;
-
+// Load a freetype font.
 NR_Font NR_Font_Load(const char* path) {
   // Attempt to load the font.
   FT_Face face;
@@ -113,97 +219,21 @@ NR_Font NR_Font_Load(const char* path) {
   NR_Font_SetSize((void*)hnd, 0, 25);
 
   // Create a shader to draw with.
-  const GLchar* vertexSource =
-    "#version 330 core\n"
-    "layout (location = 0) in vec2 posAttr;\n"
-    "layout (location = 1) in vec2 texAttr;\n"
-    "uniform mat4 proj;\n"
-    "out vec2 texcoord;\n"
-    "void main() {\n"
-    "  gl_Position = proj * vec4(posAttr.x, posAttr.y, 0.0, 1.0);\n"
-    "  texcoord = texAttr;\n"
-    "}";
+  GLuint vertexShader = loadShader(vertex_src, GL_VERTEX_SHADER);
+  GLuint geometryShader = loadShader(geometry_src, GL_GEOMETRY_SHADER);
+  GLuint fragShader = loadShader(fragment_src, GL_FRAGMENT_SHADER);
 
-  GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexSource, (void*)0);
-  glCompileShader(vertexShader);
-
-  {
-    GLint success;
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (success == GL_FALSE) {
-      GLint maxLength = 0;
-    	glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-      // Allocate space for log.
-      char* log = malloc(sizeof(char) * maxLength);
-
-      glGetShaderInfoLog(vertexShader, sizeof(char) * maxLength, &maxLength, log);
-      printf("Font vertex shader compile error:\n %s\n", log);
-
-      // Free log
-      free(log);
-
-      return (void*)0;
-    }
-  }
-
-  const GLchar* fragSource =
-    "#version 330 core\n"
-    "in vec2 texcoord;\n"
-    "uniform sampler2D sampler;\n"
-    "out vec4 color;\n"
-    "void main() {\n"
-    "  vec4 texCol = texture(sampler, texcoord);\n"
-    "  color = vec4(1.0f, 1.0f, 1.0f, texCol.r);\n"
-    "}";
-
-  GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragShader, 1, &fragSource, (void*)0);
-  glCompileShader(fragShader);
-
-  {
-    GLint success;
-    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &success);
-    if (success == GL_FALSE) {
-      GLint maxLength = 0;
-    	glGetShaderiv(fragShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-      // Allocate space for log.
-      char* log = malloc(sizeof(char) * maxLength);
-
-      glGetShaderInfoLog(fragShader, sizeof(char) * maxLength, &maxLength, log);
-      printf("Font fragment shader compile error:\n%i\n", maxLength);
-
-      // Free log
-      free(log);
-
-      return (void*)0;
-    }
-  }
-
-  hnd->program = glCreateProgram();
-  glAttachShader(hnd->program, vertexShader);
-  glAttachShader(hnd->program, fragShader);
-  glLinkProgram(hnd->program);
-
-  {
-    GLint success;
-    GLchar log[512];
-    glGetProgramiv(hnd->program, GL_LINK_STATUS, &success);
-    if (!success) {
-      glGetShaderInfoLog(fragShader, sizeof(log), (void*)0, log);
-      printf("Font shader link error:\n %s\n", log);
-      return (void*)0;
-    }
-  }
+  GLuint shaders[] = { vertexShader, geometryShader, fragShader };
+  hnd->program = linkProgram(shaders, 3);
 
   glDeleteShader(vertexShader);
+  glDeleteShader(geometryShader);
   glDeleteShader(fragShader);
 
   return (void*)hnd;
 }
 
+// Delete a font.
 void NR_Font_Delete(NR_Font font) {
   // Delete the font.
   HandleType* hnd = (HandleType*)font;
@@ -230,6 +260,7 @@ void NR_Font_Delete(NR_Font font) {
   free(hnd);
 }
 
+// Set the resolution of each
 void NR_Font_SetResolution(NR_Font font, int width, int height) {
   HandleType* hnd = (HandleType*)font;
   FT_Set_Pixel_Sizes(hnd->face, width, height);
@@ -267,7 +298,6 @@ void NR_Font_GetSize(NR_Font font, int* width, int* height) {
 
 #undef near
 #undef far
-
 static void _getOrthographicProjection(float left, float right, float bottom, float top, float near, float far, float* out) {
   out[0] = 2.0f / (right - left);
   out[1] = 0; out[2] = 0;
@@ -286,6 +316,7 @@ static void _getOrthographicProjection(float left, float right, float bottom, fl
 static void _flush(NR_Font font, Page* page, int width, int height) {
   HandleType* hnd = (HandleType*)font;
 
+  // Enable blending.
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -297,12 +328,17 @@ static void _flush(NR_Font font, Page* page, int width, int height) {
   glBindTexture(GL_TEXTURE_2D, page->texture);
   glUniform1i(glGetUniformLocation(hnd->program, "sampler"), 0);
 
+  // Set our projection matrix.
   GLfloat proj[16];
   _getOrthographicProjection(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f, proj);
   glUniformMatrix4fv(glGetUniformLocation(hnd->program, "proj"), 1, true, proj);
 
+  // Set the current time (useful for effets)
+  glUniform1f(glGetUniformLocation(hnd->program, "timer"), (float)glfwGetTime());
+
+  // Bind and draw the vertex array.
   glBindVertexArray(page->vao);
-  glDrawArrays(GL_TRIANGLES, 0, page->curQuad * (sizeof(Quad) / sizeof(Vertex)));
+  glDrawArrays(GL_POINTS, 0, page->current);
   glBindVertexArray(0);
 
   // Unbind texture
@@ -312,28 +348,43 @@ static void _flush(NR_Font font, Page* page, int width, int height) {
   glUseProgram(0);
 
   // Reset this page.
-  page->curQuad = 0;
+  page->current = 0;
 }
 
-bool NR_Font_Draw(NR_Font font, unsigned int* data, int dataWidth, int dataHeight, int startX, int startY, int width, int height) {
+// Draw a grid of characters.
+bool NR_Font_Draw(NR_Font font, NR_Glyph* data, int dataWidth, int dataHeight, int startX, int startY, int width, int height) {
   HandleType* hnd = (HandleType*)font;
 
-  // Where we are drawing to.
-  // We don't need a matrix multiplacation in the shader
-  // if we just generate the quads to fit the whole screen...
+  // Where to start drawing.
   float destX = (float)startX;
   float destY = (float)startY;
 
-  // The size of cell in the grid
-  GLfloat cellWidth = (GLfloat)hnd->charWidth;//(float)destWidth / (float)dataWidth;
-  GLfloat cellHeight = (GLfloat)hnd->charHeight;//(float)destHeight / (float)dataHeight;
+  // The size of each cell in the grid
+  GLfloat cellWidth = (GLfloat)hnd->charWidth;
+  GLfloat cellHeight = (GLfloat)hnd->charHeight;
 
   // Loop through each item in the data we are trying to draw.
   int totalSize = dataWidth * dataHeight;
   for (int i = 0; i < totalSize; ++i) {
+    // Get the grid coordinates of this character.
     int x = i % dataWidth;
     int y = i / dataWidth;
-    unsigned int codepoint = data[i];
+
+    // Get the codepoint to search for.
+    unsigned int codepoint = data[i].codepoint;
+
+    // Convert the colors to vectors.
+    unsigned int color = data[i].color;
+    unsigned int bgColor = data[i].bgColor;
+
+    Vec3d colorVec;
+    colorVec.x = (float)((color & (0xFF000000)) >> 24) / 255.0;
+    colorVec.y = (float)((color & (0x00FF0000)) >> 16) / 255.0;
+    colorVec.z = (float)((color & (0x0000FF00)) >> 8) / 255.0;
+    Vec3d bgColorVec;
+    bgColorVec.x = (float)((bgColor & (0xFF000000)) >> 24) / 255.0;
+    bgColorVec.y = (float)((bgColor & (0x00FF0000)) >> 16) / 255.0;
+    bgColorVec.z = (float)((bgColor & (0x0000FF00)) >> 8) / 255.0;
 
     // Check if we can find this codepoint.
     NR_GlyphPacker_Glyph glyph;
@@ -394,15 +445,32 @@ bool NR_Font_Draw(NR_Font font, unsigned int* data, int dataWidth, int dataHeigh
         glBindBuffer(GL_ARRAY_BUFFER, hnd->pages[glyph.page]->vbo);
 
         // Data
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Quad) * MAX_QUADS_PER_FLUSH, (void*)0, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * MAX_VERTICES_PER_FLUSH, (void*)0, GL_DYNAMIC_DRAW);
 
-        // Postions
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        // Specify the buffer format...
+        GLint colorAttrib = glGetAttribLocation(hnd->program, "vColor");
+        glEnableVertexAttribArray(colorAttrib);
+        glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
 
-        // Texcoords
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)sizeof(Vec2d));
+        GLint bgColorAttrib = glGetAttribLocation(hnd->program, "vBgColor");
+        glEnableVertexAttribArray(bgColorAttrib);
+        glVertexAttribPointer(bgColorAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bgColor));
+
+        GLint glyphRectAttrib = glGetAttribLocation(hnd->program, "vGlyphRect");
+        glEnableVertexAttribArray(glyphRectAttrib);
+        glVertexAttribPointer(glyphRectAttrib, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, glyphRect));
+
+        GLint textureRectAttrib = glGetAttribLocation(hnd->program, "vTextureRect");
+        glEnableVertexAttribArray(textureRectAttrib);
+        glVertexAttribPointer(textureRectAttrib, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureRect));
+
+        GLint bgRectAttrib = glGetAttribLocation(hnd->program, "vBgRect");
+        glEnableVertexAttribArray(bgRectAttrib);
+        glVertexAttribPointer(bgRectAttrib, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bgRect));
+
+        GLint flagsAttrib = glGetAttribLocation(hnd->program, "vFlags");
+        glEnableVertexAttribArray(flagsAttrib);
+        glVertexAttribIPointer(flagsAttrib, 1, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*)offsetof(Vertex, flags));
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
@@ -417,18 +485,21 @@ bool NR_Font_Draw(NR_Font font, unsigned int* data, int dataWidth, int dataHeigh
       }
     }
 
+    // We already have this glyph in our atlas..
     if (found) {
       Page* curPage = hnd->pages[glyph.page];
 
       // If we've gone over our maximum, flush first so we can draw some more!
-      if (curPage->curQuad >= MAX_QUADS_PER_FLUSH)
+      if (curPage->current >= MAX_VERTICES_PER_FLUSH)
         _flush(font, curPage, width, height);
 
-      // Get the position of this glyph on texture in texture coordinates.
-      GLfloat glyphTexX = (GLfloat)glyph.x / (GLfloat)PAGE_WIDTH;
-      GLfloat glyphTexY = (GLfloat)glyph.y / (GLfloat)PAGE_HEIGHT;
-      GLfloat glyphTexWidth = (GLfloat)glyph.width / (GLfloat)PAGE_WIDTH;
-      GLfloat glyphTexHeight = (GLfloat)glyph.height / (GLfloat)PAGE_HEIGHT;
+      // Get the rect for this glyph on the texture.
+      GLfloat glyphStartTexX = (GLfloat)glyph.x / (GLfloat)PAGE_WIDTH;
+      GLfloat glyphStartTexY = (GLfloat)glyph.y / (GLfloat)PAGE_HEIGHT;
+      GLfloat glyphEndTexX = glyphStartTexX + (GLfloat)glyph.width / (GLfloat)PAGE_WIDTH;
+      GLfloat glyphEndTexY = glyphStartTexY + (GLfloat)glyph.height / (GLfloat)PAGE_HEIGHT;
+
+      // Now get the rect to for the size of the glyph.
 
       // Get the maximum size for a glyph (in pixels)
       GLfloat maxWidth = ((GLfloat)(hnd->face->bbox.xMax - hnd->face->bbox.xMin) / (GLfloat)hnd->face->units_per_EM) * (GLfloat)hnd->face->size->metrics.x_ppem;
@@ -439,15 +510,11 @@ bool NR_Font_Draw(NR_Font font, unsigned int* data, int dataWidth, int dataHeigh
       GLfloat baseline = ascender / maxHeight;
 
       // Left and top bearing
-      //GLfloat bearingX = (GLfloat)glyph.bearingX / maxWidth;
-      GLfloat bearingX = ((maxWidth - (GLfloat)glyph.width) / 2.0f) / maxWidth; // For now, just center the character.
+      GLfloat bearingX = ((maxWidth - (GLfloat)glyph.width) / 2.0f) / maxWidth;
       GLfloat bearingY = (GLfloat)glyph.bearingY / maxHeight;
 
       GLfloat glyphWidth = (GLfloat)glyph.width / maxWidth;
       GLfloat glyphHeight = (GLfloat)glyph.height / maxHeight;
-
-      // The default line spacing (distance between lines, from the bottom of one line to the start of the next)
-      //GLfloat defLineSpacingEM = (GLfloat)(hnd->face->height) - (maxHeightEM);
 
       // The start pos of this glyph
       GLfloat startX = destX + ((float)x + bearingX) * cellWidth;
@@ -455,28 +522,28 @@ bool NR_Font_Draw(NR_Font font, unsigned int* data, int dataWidth, int dataHeigh
       GLfloat endX = startX + glyphWidth * cellWidth;
       GLfloat endY = startY + glyphHeight * cellHeight;
 
-      // First triangle.
-      Quad quad;
-      quad.vertices[0].pos = (Vec2d){ startX, startY };
-      quad.vertices[0].texcoord = (Vec2d){ glyphTexX, glyphTexY };
-      quad.vertices[1].pos = (Vec2d){ endX, startY };
-      quad.vertices[1].texcoord = (Vec2d){ glyphTexX + glyphTexWidth, glyphTexY };
-      quad.vertices[2].pos = (Vec2d){ endX, endY };
-      quad.vertices[2].texcoord = (Vec2d){ glyphTexX + glyphTexWidth, glyphTexY + glyphTexHeight };
+      // First Vertex.
+      Vertex vertex;
+      vertex.color = colorVec;
+      vertex.bgColor = bgColorVec;
+      vertex.glyphRect = (Vec4d) { startX, startY,
+                                   endX, endY };
+      vertex.textureRect = (Vec4d) { glyphStartTexX, glyphStartTexY,
+                                   glyphEndTexX, glyphEndTexY };
+      vertex.bgRect = (Vec4d) { destX + cellWidth * x, destY + cellHeight * y,
+                                destX + cellWidth * (x+1), destY + cellHeight * (y+1) };
 
-      // Second triangle.
-      quad.vertices[3] = quad.vertices[0];
-      quad.vertices[4] = quad.vertices[2];
-      quad.vertices[5].pos = (Vec2d){ startX, endY };
-      quad.vertices[5].texcoord = (Vec2d){ glyphTexX, glyphTexY + glyphTexHeight };
+      vertex.flags = 0;
+      if (data[i].flashing)
+        vertex.flags |= VERTEX_FLAGS_FLASHING;
 
-      // Map the vertex buffer and add quad data at the correct location.
+      // Map the vertex buffer and add vertex data at the correct location.
       glBindBuffer(GL_ARRAY_BUFFER, curPage->vbo);
-      glBufferSubData(GL_ARRAY_BUFFER, curPage->curQuad * sizeof(Quad), sizeof(Quad), &quad);
+      glBufferSubData(GL_ARRAY_BUFFER, curPage->current * sizeof(Vertex), sizeof(Vertex), &vertex);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-      // We've added a quad.
-      curPage->curQuad += 1;
+      // We've added a vertex.
+      curPage->current += 1;
     }
   }
 

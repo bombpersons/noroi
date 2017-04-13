@@ -1,10 +1,9 @@
-#include <noroi/base/noroi.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <noroi/client/noroi_client.h>
+#include <noroi/client/noroi_client.hpp>
+#include <noroi/gui/frame.hpp>
 
 int main(int argc, char** argv) {
   // Quit if we don't have an address to connect to.
@@ -32,9 +31,19 @@ int main(int argc, char** argv) {
   // A glyph to test with.
   NR_Glyph hashGlyph;
   hashGlyph.codepoint = '#';
+  hashGlyph.flashing = true;
+  hashGlyph.color = 0xCCCCCCFF;
+  hashGlyph.color = 0xFFFFFFFF;
 
   NR_Glyph zeroGlyph;
   zeroGlyph.codepoint = 'O';
+  zeroGlyph.flashing = false;
+  zeroGlyph.color = 0xFF0000FF;
+  zeroGlyph.bgColor = 0x00FF00FF;
+
+  // A color
+  unsigned int color = 0xFF00AAFF;
+  unsigned int bgColor = 0x00FF00FF;
 
   // Start a loop checking any events coming from the server.
   bool running = true;
@@ -44,9 +53,13 @@ int main(int argc, char** argv) {
       switch (event.type) {
         case NR_EVENT_RESIZE:
           //NR_Client_Clear(client, &hashGlyph);
-          NR_Client_Rectangle(client, 0, 0, 10, 10, &hashGlyph);
-          NR_Client_Text(client, 1, 1, "Hey there!");
+          NR_Client_RectangleFill(client, 0, 0, 10, 10, &hashGlyph);
+          NR_Client_Text(client, 1, 1, "Hey there!", color, bgColor, false);
           NR_Client_SwapBuffers(client);
+          break;
+
+        case NR_EVENT_CHARACTER:
+          printf("CHAR PRESSED :     %u\n", event.data.charData.codepoint);
           break;
 
         case NR_EVENT_MOUSE_MOVE:

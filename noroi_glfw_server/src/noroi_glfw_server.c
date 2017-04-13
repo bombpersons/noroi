@@ -84,7 +84,7 @@ typedef struct {
 
   // The current buffer for actually drawing the text.
   // This takes into account stuff like flashing characters.
-  unsigned int* drawBuff;
+  NR_Glyph* drawBuff;
 
   // Width and height of our buffers.
   int buffWidth, buffHeight;
@@ -98,14 +98,6 @@ typedef struct {
 // Glfw errors...
 static void _glfwErrorCallback(int error, const char* desc) {
   printf("[GLFW ERROR] %i: %s\n", error, desc);
-}
-
-static NR_Key ConvGLFWKey(int key) {
-  return NR_KEY_UP;
-}
-
-static NR_KeyMod ConvGLFWKeyMod(int mods) {
-  return NR_KEY_MOD_SHIFT;
 }
 
 static bool ConvPixelToGird(InternalData* internal, int* outX, int* outY, int inX, int inY) {
@@ -151,8 +143,8 @@ static void _updateBufferSizes(InternalData* internal, int width, int height) {
     NR_Glyph* buff2 = malloc(sizeof(NR_Glyph) * bufSize);
     memset(buff2, 0, sizeof(NR_Glyph) * bufSize);
 
-    unsigned int* drawBuff = malloc(sizeof(unsigned int) * bufSize);
-    memset(drawBuff, 0, sizeof(unsigned int) * bufSize);
+    NR_Glyph* drawBuff = malloc(sizeof(NR_Glyph) * bufSize);
+    memset(drawBuff, 0, sizeof(NR_Glyph) * bufSize);
 
     // COPY OVER THE CONTENTS OF THE OLD BUFFER
     for (int x = 0; x < oldWidth && x < internal->buffWidth; ++x) {
@@ -186,22 +178,52 @@ static void _updateBufferSizes(InternalData* internal, int width, int height) {
 
 static void _updateDrawBuffer(InternalData* internal) {
   int buffSize = internal->buffWidth * internal->buffHeight;
+
+  // Copy each character across.
   for (int i = 0; i < buffSize; ++i) {
-    internal->drawBuff[i] = (*internal->frontBuff)[i].codepoint;
+    internal->drawBuff[i] = (*internal->frontBuff)[i];
   }
 }
 
 static void _glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   InternalData* internal = (InternalData*)glfwGetWindowUserPointer(window);
 
-  // Make a key event.
+  // Deal keys that don't come through on the char callback.
   NR_Event event;
-  if (action == GLFW_PRESS) event.type = NR_EVENT_KEY_PRESS;
-  else if (action == GLFW_RELEASE) event.type = NR_EVENT_KEY_RELEASE;
+  event.type = NR_EVENT_CHARACTER;
+  event.data.charData.codepoint = 0;
 
-  event.data.keyData.key = ConvGLFWKey(key);
-  event.data.keyData.mod = ConvGLFWKeyMod(mods);
+  switch (key) {
+    case GLFW_KEY_LEFT:
+      event.data.charData.codepoint = 8592; // the '←' character.
+      break;
+    case GLFW_KEY_RIGHT:
+      event.data.charData.codepoint = 8594; // the '→' character.
+      break;
+    case GLFW_KEY_UP:
+      event.data.charData.codepoint = 8593; // the '↑' character.
+      break;
+    case GLFW_KEY_DOWN:
+      event.data.charData.codepoint = 8595; // the '↓' character.
+      break;
+    case GLFW_KEY_ENTER:
+      event.data.charData.codepoint = (unsigned int)'\n';
+      break;
+  }
 
+  // Only send the event if we handled it.
+  if (event.data.charData.codepoint != 0) {
+    NR_Server_Base_Event(internal->baseServer, &event);
+  }
+}
+
+static void _glfwCharCallback(GLFWwindow* window, unsigned int codepoint, int mods) {
+  InternalData* internal = (InternalData*)glfwGetWindowUserPointer(window);
+
+  // Make a char event.
+  NR_Event event;
+  event.type = NR_EVENT_CHARACTER;
+  event.data.charData.codepoint = codepoint;
   NR_Server_Base_Event(internal->baseServer, &event);
 }
 
@@ -288,10 +310,6 @@ static void _glfwWindowSizeCallback(GLFWwindow* window, int width, int height) {
 
     // Potentially need to re-allocate buffers due to resize..
     _updateBufferSizes(internal, width, height);
-
-    // Resize again so that we don't have any half characters visible.
-    //if (internal->fontWidth > 0 && internal->fontHeight > 0 && internal->buffWidth > 0 && internal->buffHeight)
-      //glfwSetWindowSize(window, width * internal->fontWidth, height * internal->fontHeight);
   }
 }
 
@@ -331,10 +349,6 @@ static int _draw(void* data) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Get the size of the screen so we can scale things properly.
-    int width, height;
-    glfwGetWindowSize(internal->window, &width, &height);
-
     // Lock the draw mutex here.
     mtx_lock(&internal->drawMutex);
 
@@ -358,6 +372,10 @@ static int _draw(void* data) {
 
     // Draw the grid of text.
     if (internal->buffWidth && internal->buffHeight && internal->font) {
+      // Get the size of the screen so we can scale things properly.
+      int width, height;
+      glfwGetWindowSize(internal->window, &width, &height);
+
       // Draw it in the center.
       int totalPixelX = internal->fontWidth * internal->buffWidth;
       int totalPixelY = internal->fontHeight * internal->buffHeight;
@@ -414,6 +432,7 @@ static bool _initialize(NR_Server_Base server) {
   // Set this handle to be associated with our window, so that we can update stuff
   // properly in callbacks.
   glfwSetWindowUserPointer(window, (void*)internal);
+  glfwSetCharModsCallback(window, _glfwCharCallback);
   glfwSetKeyCallback(window, _glfwKeyCallback);
   glfwSetCursorPosCallback(window, _glfwCursorPosCallback);
   glfwSetMouseButtonCallback(window, _glfwMouseButtonCallback);
@@ -434,7 +453,7 @@ static bool _initialize(NR_Server_Base server) {
   internal->buff2 = (NR_Glyph*)0;
   internal->frontBuff = &internal->buff1;
   internal->backBuff = &internal->buff2;
-  internal->drawBuff = (unsigned int*)0;
+  internal->drawBuff = (NR_Glyph*)0;
 
   internal->buffWidth = 0;
   internal->buffHeight = 0;
@@ -593,7 +612,7 @@ static bool _getGlyph(NR_Server_Base server, unsigned int x, unsigned int y, NR_
   return true;
 }
 
-static bool _text(NR_Server_Base server, unsigned int x, unsigned int y, const char* text) {
+static bool _text(NR_Server_Base server, unsigned int x, unsigned int y, const char* text, unsigned int color, unsigned int bgColor, bool flash) {
   // Decode the text from utf-8.
   uint32_t codepoint;
   uint32_t state = 0;
@@ -604,6 +623,10 @@ static bool _text(NR_Server_Base server, unsigned int x, unsigned int y, const c
     if (!decode(&state, &codepoint, text[i])) {
       NR_Glyph glyph;
       glyph.codepoint = codepoint;
+      glyph.color = color;
+      glyph.bgColor = bgColor;
+      glyph.flashing = flash;
+
       _setGlyph(server, x + count, y, &glyph);
     }
 
@@ -646,14 +669,6 @@ static bool _swapBuffers(NR_Server_Base server) {
 
   // Unlock.
   mtx_unlock(&internal->drawMutex);
-
-  // if (internal->frontBuff == &internal->buff1) {
-  //   internal->frontBuff = &internal->buff2;
-  //   internal->backBuff = &internal->buff1;
-  // } else {
-  //   internal->frontBuff = &internal->buff1;
-  //   internal->backBuff = &internal->buff2;
-  // }
 
   return true;
 }

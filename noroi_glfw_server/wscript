@@ -1,13 +1,42 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
+from waflib import Build, Utils, TaskGen
+
+def embed_file(input, output):
+    print("Embedding shader " + input.name + " into " + output.name + "...")
+
+    symbolName = output.name.split('.')[0] + "_src"
+
+    input_file = open(input.abspath(), 'r')
+    output_file = open(output.abspath(), 'w')
+
+    output_file.write("#include <stdlib.h>\n")
+    output_file.write("const char " + symbolName + "[] = {\n")
+
+    data = input_file.read() + "\n";
+    print(data);
+
+    count = 0
+    for c in data:
+        output_file.write(str(hex(ord(c)) + ", "))
+
+        count += 1
+        if count > 10:
+            output_file.write("\n")
+            count = 0
+
+    output_file.write("0x0 };\n")
+    output_file.write("const size_t " + symbolName + "_size = sizeof(" + symbolName + ");\n")
+
+    input_file.close()
+    output_file.close()
+
 def options(ctx):
     ctx.load('compiler_c')
 
 def configure(ctx):
     ctx.load('compiler_c')
-
-    import sys
 
     #use c99
     ctx.env.append_value('CFLAGS', ['-std=c99'])
@@ -23,7 +52,18 @@ def configure(ctx):
     ctx.check_cfg(package='freetype2', args='--cflags --libs', uselib_store='freetype', mandatory=True);
     ctx.env.append_value('NOROI_GLFW_SERVER_LIB', ['freetype']);
 
+def generate_embedded_shader_source(ctx):
+    # Generate c files for the shaders.
+    for file in ctx.path.ant_glob('noroi_glfw_server/include/noroi/glfw_server/shaders/**/*'):
+        target = file.get_bld().change_ext(".h")
+        source = file
+        embed_file(source, target)
+
 def build(ctx):
+    # First generate the c files for shaders.
+    ctx.add_pre_fun(generate_embedded_shader_source)
+
+    # Install include.
     ctx.install_files('${PREFIX}/include/noroi/glfw_server', ctx.path.ant_glob('include/noroi/glfw_server/**/*.h'))
 
     ctx.shlib(source=ctx.path.ant_glob('src/**/*.c'),

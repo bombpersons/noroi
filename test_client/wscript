@@ -2,9 +2,13 @@
 # encoding: utf-8
 
 def options(ctx):
+    ctx.load('compiler_cxx')
+
     ctx.add_option('--buildtestclient', action='store', default=True, help='Build the test client also.')
 
 def configure(ctx):
+    ctx.load('compiler_cxx')
+
     if ctx.options.buildtestclient:
         ctx.env.BUILD_TEST_CLIENT = True
     else:
@@ -12,8 +16,8 @@ def configure(ctx):
 
 def build(ctx):
     if ctx.env.BUILD_TEST_CLIENT:
-        ctx.program(source=ctx.path.ant_glob('src/**/*.c'),
+        ctx.program(source=ctx.path.ant_glob('src/**/*.cpp'),
                     target='noroi_test_client',
                     includes=['include'],
-                    use='noroi_client',
+                    use=['noroi_client', 'noroi_gui'],
                     vnum='0.1')

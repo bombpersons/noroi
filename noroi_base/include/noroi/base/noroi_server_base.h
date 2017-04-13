@@ -22,7 +22,7 @@ typedef bool(*NR_Server_Base_GetCaption)(NR_Server_Base, char* buf, unsigned int
 typedef bool(*NR_Server_Base_SetGlyph)(NR_Server_Base, unsigned int, unsigned int, const NR_Glyph*);
 typedef bool(*NR_Server_Base_GetGlyph)(NR_Server_Base, unsigned int, unsigned int, NR_Glyph*);
 
-typedef bool(*NR_Server_Base_Text)(NR_Server_Base, unsigned int x, unsigned int y, const char* text);
+typedef bool(*NR_Server_Base_Text)(NR_Server_Base, unsigned int x, unsigned int y, const char* text, unsigned int color, unsigned int bgColor, bool flash);
 typedef bool(*NR_Server_Base_Rectangle)(NR_Server_Base, unsigned int x, unsigned int y, unsigned int w, unsigned int h, bool fill, const NR_Glyph* glyph);
 
 typedef bool(*NR_Server_Base_Clear)(NR_Server_Base, const NR_Glyph*);

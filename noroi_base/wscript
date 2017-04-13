@@ -32,7 +32,7 @@ def configure(ctx):
         ctx.env.append_value('NOROI_BASE_LIB', ['gdi32'])
 
 def build(ctx):
-    ctx.install_files('${PREFIX}/include/noroi/base', ctx.path.ant_glob('include/noroi/base/**/*.h'))
+    ctx.install_files('${PREFIX}/include/noroi/base', ctx.path.ant_glob('include/noroi/base/**/*.h*'))
 
     ctx.shlib(source=ctx.path.ant_glob('src/**/*.c'),
               target='noroi_base',

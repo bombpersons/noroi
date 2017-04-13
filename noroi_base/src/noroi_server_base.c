@@ -118,7 +118,7 @@ static void _handleRequest(NR_Server_Base server, void* data, unsigned int size)
     // Text.
     NOROI_SERVER_BASE_HANDLE_REQUEST_BEGIN(NR_Request_Type_Text, internalData->callbacks.text) {
       NR_Request_Text_Contents* contents = (NR_Request_Text_Contents*)requestHeader->contents;
-      _successOrError(server, internalData->callbacks.text(server, contents->x, contents->y, contents->text), "Error ocurred calling Text");
+      _successOrError(server, internalData->callbacks.text(server, contents->x, contents->y, contents->text, contents->color, contents->bgColor, contents->flash), "Error ocurred calling Text");
     } NOROI_SERVER_BASE_HANDLE_REQUEST_END;
 
     // Rectangle.

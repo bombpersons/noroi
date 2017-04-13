@@ -1,0 +1,22 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+def options(ctx):
+    ctx.load('compiler_cxx')
+
+def configure(ctx):
+    ctx.load('compiler_cxx')
+
+    import sys
+
+    # Only thing we need is noroi_base
+    ctx.env.append_value('NOROI_GUI_LIB', ['noroi_client']);
+
+def build(ctx):
+    ctx.install_files('${PREFIX}/include/noroi/gui', ctx.path.ant_glob('include/noroi/gui/**/*.hpp'))
+
+    ctx.shlib(source=ctx.path.ant_glob('src/**/*.cpp'),
+              target='noroi_gui',
+              includes=['include'],
+              export_includes=['include'],
+              use=ctx.env.NOROI_GUI_LIB)

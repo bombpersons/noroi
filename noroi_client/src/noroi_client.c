@@ -223,12 +223,15 @@ void NR_Client_Rectangle(NR_Client client, int x, int y, int w, int h, const NR_
 }
 
 // Draw text
-void NR_Client_Text(NR_Client client, int x, int y, const char* text) {
+void NR_Client_Text(NR_Client client, int x, int y, const char* text, unsigned int color, unsigned int bgColor, bool flash) {
   // Create the request.
   int contentsSize = sizeof(NR_Request_Text_Contents) + strlen(text) + 1;
   NR_Request_Text_Contents* contents = (NR_Request_Text_Contents*)malloc(contentsSize);
   contents->x = x;
   contents->y = y;
+  contents->color = color;
+  contents->bgColor = bgColor;
+  contents->flash = flash;
   strcpy(contents->text, text);
 
   // Send it.

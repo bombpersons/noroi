@@ -22,6 +22,6 @@ void NR_Font_SetSize(NR_Font font, int width, int height);
 void NR_Font_GetSize(NR_Font font, int* width, int* height);
 
 // Draw a grid of characters
-bool NR_Font_Draw(NR_Font font, unsigned int* data, int dataWidth, int dataHeight, int x, int y, int width, int height);
+bool NR_Font_Draw(NR_Font font, NR_Glyph* data, int dataWidth, int dataHeight, int x, int y, int width, int height);
 
 #endif
